@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow
 {
@@ -80,6 +82,19 @@ namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow
             base.OnApplyTemplate();
         }
 
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT { public int X; public int Y; }
+
+        const uint SWP_NOSIZE = 0x0001;
+        const uint SWP_NOZORDER = 0x0004;
+
         /// <summary>
         /// <c>Method</c> Handles mouse move event.
         /// </summary>
@@ -97,10 +112,22 @@ namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow
 
                 if (WindowState == WindowState.Maximized)
                 {
+                    GetCursorPos(out POINT cursor);
+
+                    Point relativeMousePos = e.GetPosition(this);
+                    double widthFraction = relativeMousePos.X / ActualWidth;
+                    double heightFraction = relativeMousePos.Y / ActualHeight;
+
                     ToggleWindowState();
 
-                    Left = MousePosition.X - Width / 2;
-                    Top = MousePosition.Y - 15;
+                    // Width/Height in physical pixels after restore
+                    nint hwnd = new WindowInteropHelper(this).Handle;
+
+                    // Use raw pixel positions — no DPI conversion at all
+                    int newX = (int)(cursor.X - (ActualWidth * widthFraction));
+                    int newY = (int)(cursor.Y - (ActualHeight * heightFraction));
+
+                    SetWindowPos(hwnd, IntPtr.Zero, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
                     // This is a weird side effect, but by setting conditions to false,
                     // We make sure that DragMove won't be called after draging and directly maximizing the window.

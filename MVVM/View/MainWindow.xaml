@@ -9,6 +9,8 @@
         Style="{StaticResource ApplicationWindow}"
         Title="MainWindow">
     <Grid>
+        <Grid Background="{StaticResource Tab}" Margin="10">
 
+        </Grid>
     </Grid>
 </appwindow:MainApplicationWindow>

@@ -38,7 +38,7 @@
                                             VerticalAlignment="Center"
                                             Orientation="Horizontal"
                                             HorizontalAlignment="Left">
-                                    <Image Source="/Icons/Window/ns-logo.png"
+                                    <Image Source="/Images/Icons/logo.png"
                                            Margin="5,0,5,0"
                                            VerticalAlignment="Center"
                                            x:Name="ApplicationLogo"
@@ -47,35 +47,40 @@
                                           Background="Transparent"
                                           VerticalAlignment="Center">
                                         <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
+                                                  Header="File"
+                                                  Height="20"
+                                                  VerticalAlignment="Top">
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="New"
+                                                      Height="20"
+                                                      VerticalAlignment="Top"/>
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="Open"
+                                                      Height="20"
+                                                      VerticalAlignment="Top"/>
+                                            <Separator Style="{StaticResource MenuSeparatorStyle}"/>
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="Save"
+                                                      Height="20"
+                                                      VerticalAlignment="Top"/>
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="Save As..."
+                                                      Height="20"
+                                                      VerticalAlignment="Top"/>
+                                            <Separator Style="{StaticResource MenuSeparatorStyle}"/>
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="Exit"
+                                                      Height="20"
+                                                      VerticalAlignment="Top"/>
+                                        </MenuItem>
+                                        <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
                                                   Header="Edit"
                                                   Height="20"
                                                   VerticalAlignment="Top">
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Preferences"
                                                       Height="20"
-                                                      VerticalAlignment="Top"
-                                                      x:Name="PreferencesMenuItem"
-                                                      Command="{Binding Path=SettingsWindowCommand}"/>
-                                        </MenuItem>
-                                        <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
-                                                  Header="Presets"
-                                                  Height="20"
-                                                  VerticalAlignment="Top">
-                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                                                      Header="Load Preset"
-                                                      Height="20"
-                                                      VerticalAlignment="Top"
-                                                      Command="{Binding Path=LoadPresetCommand}"/>
-                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                                                      Header="Save Preset"
-                                                      Height="20"
-                                                      VerticalAlignment="Top"
-                                                      Command="{Binding Path=SavePresetCommand}"/>
-                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                                                      Header="Save Preset As..."
-                                                      Height="20"
-                                                      VerticalAlignment="Top"
-                                                      Command="{Binding Path=SavePresetAsCommand}"/>
+                                                      VerticalAlignment="Top"/>
                                         </MenuItem>
                                     </Menu>
                                 </StackPanel>

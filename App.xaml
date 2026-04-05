@@ -3,6 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AutomatedSoundtrackSystem">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MVVM/View/Styles/Themes/Dark.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowControlButtonStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowToolbarDropdownStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

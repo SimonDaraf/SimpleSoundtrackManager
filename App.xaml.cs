@@ -1,7 +1,6 @@
-﻿using AutomatedSoundtrackSystem.MVVM.ViewModel;
+﻿using AutomatedSoundtrackSystem.MVVM.View;
+using AutomatedSoundtrackSystem.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 
 namespace AutomatedSoundtrackSystem

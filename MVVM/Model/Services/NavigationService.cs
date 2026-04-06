@@ -10,11 +10,11 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
     public class NavigationService
     {
         private readonly Func<NavigationViews, ObservableObject> tryNavigate;
-        private readonly Func<CreateNewGroupWindow> createNewWindowFactory;
+        private readonly Func<CreateNewSessionWindow> createNewWindowFactory;
 
         public event EventHandler<ObservableObject>? OnNavigationRequested;
 
-        public NavigationService(Func<NavigationViews, ObservableObject> tryNavigate, Func<CreateNewGroupWindow> createNewWindowFactory)
+        public NavigationService(Func<NavigationViews, ObservableObject> tryNavigate, Func<CreateNewSessionWindow> createNewWindowFactory)
         {
             this.tryNavigate = tryNavigate;
             this.createNewWindowFactory = createNewWindowFactory;
@@ -30,11 +30,11 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
             return createNewWindowFactory();
         }
 
-        public void RequestNavigationToGroup(Group group)
+        public void RequestNavigationToSession(Session session)
         {
-            if (tryNavigate(NavigationViews.GroupView) is GroupViewModel vm)
+            if (tryNavigate(NavigationViews.SessionView) is SessionViewModel vm)
             {
-                vm.Group = group;
+                vm.Session = session;
                 OnNavigationRequested?.Invoke(this, vm);
             }
         }
@@ -42,6 +42,6 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
 
     public enum NavigationViews
     {
-        GroupView
+        SessionView
     }
 }

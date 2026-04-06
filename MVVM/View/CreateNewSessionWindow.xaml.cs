@@ -18,9 +18,9 @@ namespace AutomatedSoundtrackSystem.MVVM.View
     /// <summary>
     /// Interaction logic for CreateNewGroupWindow.xaml
     /// </summary>
-    public partial class CreateNewGroupWindow : SettingsApplicationWindow
+    public partial class CreateNewSessionWindow : SettingsApplicationWindow
     {
-        public CreateNewGroupWindow()
+        public CreateNewSessionWindow()
         {
             InitializeComponent();
         }

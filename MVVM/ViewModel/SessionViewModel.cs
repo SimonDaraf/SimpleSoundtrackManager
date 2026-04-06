@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutomatedSoundtrackSystem.MVVM.ViewModel
 {
-    public partial class GroupViewModel : ObservableObject
+    public partial class SessionViewModel : ObservableObject
     {
         [ObservableProperty]
-        private Group? group;
+        private Session? session;
     }
 }

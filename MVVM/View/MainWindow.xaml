@@ -9,6 +9,6 @@
         Style="{StaticResource ApplicationWindow}"
         Title="SM" DataContext="AutomatedSoundtrackSystem.MVVM.ViewModel.MainWindowViewModel">
     <Grid>
-        <ContentPresenter/>
+        <ContentPresenter Content="{Binding ActiveViewModel}"/>
     </Grid>
 </appwindow:MainApplicationWindow>

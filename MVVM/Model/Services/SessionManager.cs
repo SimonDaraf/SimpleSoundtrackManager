@@ -7,12 +7,12 @@ using System.Windows;
 
 namespace AutomatedSoundtrackSystem.MVVM.Model.Services
 {
-    public class GroupManager
+    public class SessionManager
     {
         private readonly string directory;
         private readonly ILogger logger;
 
-        public GroupManager(ILogger<GroupManager> logger)
+        public SessionManager(ILogger<SessionManager> logger)
         {
             this.logger = logger;
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SoundtrackManager");
@@ -27,36 +27,46 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
             }
         }
 
-        private Group? LoadGroup(string path)
+        private Session? LoadGroup(string path)
         {
             try
             {
-                return Serializer.Deserialize<Group>(path);
+                return Serializer.Deserialize<Session>(path);
             }
             catch (Exception ex)
             {
-                logger.LogError("Failed to load group:", [ex]);
+                logger.LogError("Failed to load Session:", [ex]);
                 return null;
             }
         }
 
         /// <summary>
+        /// Returns the standard directory.
+        /// </summary>
+        public string GetStandardPath()
+        {
+            return directory;
+        }
+
+        /// <summary>
         /// Access all groups in standard directory.
         /// </summary>
-        public List<Group> GetGroupsInStandardDirectory()
+        public List<Session> GetSessionsInStandardDirectory()
         {
             // Get all recent files in base directory.
             FileInfo[] files = [.. new DirectoryInfo(directory)
                 .GetFiles("*.sm", SearchOption.AllDirectories)
                 .OrderBy(f => f.LastWriteTime)];
 
-            List<Group> groups = [];
+            List<Session> sessions = [];
 
             foreach (FileInfo fileInfo in files)
             {
                 try
                 {
-                    groups.Add(Serializer.Deserialize<Group>(fileInfo.FullName));
+                    Session session = Serializer.Deserialize<Session>(fileInfo.FullName);
+                    session.LastModified = fileInfo.LastWriteTime.ToShortDateString();
+                    sessions.Add(session);
                 }
                 catch (Exception ex)
                 {
@@ -64,48 +74,48 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
                 }
             }
 
-            return groups;
+            return sessions;
         }
 
         /// <summary>
         /// Tries to create a new group and returns the created group.
         /// </summary>
-        public Group? CreateNewGroup(string name)
+        public Session? CreateNewSession(string name)
         {
-            try
+            string path = Path.Combine(directory, name);
+            if (!Directory.Exists(path))
             {
-                string path = Path.Combine(directory, name);
-                if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            }
+            else
+            {
+                MessageBoxResult res = MessageBox.Show("Session already exists, are you sure you want to override it?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (res == MessageBoxResult.No)
                 {
-                    Directory.CreateDirectory(path);
+                    return null;
                 }
-
-                string finalPath = Path.Combine(path, $"{name}.sm");
-
-                Group group = new Group
-                {
-                    Name = name,
-                    Path = finalPath
-                };
-
-                Serializer.ToBinary(group, finalPath);
-                return null;
             }
-            catch (Exception ex)
+
+            string finalPath = Path.Combine(path, $"{name}.sm");
+
+            Session group = new Session
             {
-                logger.LogError("Failed to write file.", [ex]);
-                return null;
-            }
+                Name = name,
+                Path = finalPath
+            };
+
+            Serializer.ToBinary(group, finalPath);
+            return group;
         }
 
         /// <summary>
         /// Opens file explorer and opens the selected group.
         /// </summary>
-        public Group? BrowseGroup()
+        public Session? BrowseSession()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = false;
-            openFileDialog.Filter = "SM Group Files (*.sm)|*.sm";
+            openFileDialog.Filter = "SM Session Files (*.sm)|*.sm";
             openFileDialog.InitialDirectory = directory;
 
             bool? result = openFileDialog.ShowDialog();
@@ -118,8 +128,8 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
                 return null;
             } else
             {
-                logger.LogWarning("Failed to load group file.");
-                MessageBox.Show("Failed to load group.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                logger.LogWarning("Failed to load session file.");
+                MessageBox.Show("Failed to load session.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }

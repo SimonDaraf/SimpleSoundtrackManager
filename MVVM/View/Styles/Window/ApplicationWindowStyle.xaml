@@ -53,11 +53,13 @@
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="New"
                                                       Height="20"
-                                                      VerticalAlignment="Top"/>
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=NewSessionCommand}"/>
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Open"
                                                       Height="20"
-                                                      VerticalAlignment="Top"/>
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=OpenSessionCommand}"/>
                                             <Separator Style="{StaticResource MenuSeparatorStyle}"/>
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Save"

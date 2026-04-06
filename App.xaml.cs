@@ -34,26 +34,33 @@ namespace AutomatedSoundtrackSystem
                 DataContext = provider.GetRequiredService<MainWindowViewModel>()
             });
 
-            services.AddTransient(provider => new OpenGroupWindow
+            services.AddTransient(provider =>
             {
-                DataContext = provider.GetRequiredService<OpenGroupViewModel>()
+                OpenSessionViewModel vm = provider.GetRequiredService<OpenSessionViewModel>();
+                OpenSessionWindow v = new OpenSessionWindow
+                {
+                    DataContext = vm
+                };
+                vm.Owner = v;
+                return v;
             });
 
-            services.AddTransient(provider => new CreateNewGroupWindow
+            services.AddTransient(provider => new CreateNewSessionWindow
             {
-                DataContext = provider.GetRequiredService<CreateNewGroupViewModel>()
+                DataContext = provider.GetRequiredService<CreateNewSessionViewModel>()
             });
 
             // Declaration of all view models.
             services.AddSingleton<MainWindowViewModel>();
             services.AddTransient<TrackSelectorViewModel>();
-            services.AddTransient<OpenGroupViewModel>();
-            services.AddTransient<CreateNewGroupViewModel>();
-            services.AddKeyedTransient<GroupViewModel>(NavigationViews.GroupView);
+            services.AddTransient<OpenSessionViewModel>();
+            services.AddTransient<CreateNewSessionViewModel>();
+            services.AddTransient<SessionSelectorViewModel>();
+            services.AddKeyedTransient<ObservableObject, SessionViewModel>(NavigationViews.SessionView);
 
             // Declaration of all services.
             services.AddSingleton<NavigationService>();
-            services.AddSingleton<GroupManager>();
+            services.AddSingleton<SessionManager>();
 
             // Other misc declarations.
             services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => track => {
@@ -63,7 +70,8 @@ namespace AutomatedSoundtrackSystem
             });
 
             services.AddTransient<Func<NavigationViews, ObservableObject>>(provider => key => provider.GetRequiredKeyedService<ObservableObject>(key));
-            services.AddTransient<Func<CreateNewGroupWindow>>(provider => () => provider.GetRequiredService<CreateNewGroupWindow>());
+            services.AddTransient<Func<CreateNewSessionWindow>>(provider => () => provider.GetRequiredService<CreateNewSessionWindow>());
+            services.AddTransient<Func<SessionSelectorViewModel>>(provider => () => provider.GetRequiredService<SessionSelectorViewModel>());
 
             // Build provider.
             serviceProvider = services.BuildServiceProvider();
@@ -77,7 +85,7 @@ namespace AutomatedSoundtrackSystem
             base.OnStartup(e);
 
             // Show open group window on startup.
-            OpenGroupWindow gw = serviceProvider.GetRequiredService<OpenGroupWindow>();
+            OpenSessionWindow gw = serviceProvider.GetRequiredService<OpenSessionWindow>();
             gw.Owner = MainWindow;
             gw.ShowDialog();
         }

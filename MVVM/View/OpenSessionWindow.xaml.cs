@@ -5,9 +5,9 @@ namespace AutomatedSoundtrackSystem.MVVM.View
     /// <summary>
     /// Interaction logic for OpenGroupWindow.xaml
     /// </summary>
-    public partial class OpenGroupWindow : SettingsApplicationWindow
+    public partial class OpenSessionWindow : SettingsApplicationWindow
     {
-        public OpenGroupWindow()
+        public OpenSessionWindow()
         {
             InitializeComponent();
         }

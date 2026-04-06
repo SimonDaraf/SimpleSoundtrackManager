@@ -1,7 +1,9 @@
 ﻿<Application x:Class="AutomatedSoundtrackSystem.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:AutomatedSoundtrackSystem">
+             xmlns:local="clr-namespace:AutomatedSoundtrackSystem"
+             xmlns:viewModel="clr-namespace:AutomatedSoundtrackSystem.MVVM.ViewModel"
+             xmlns:view="clr-namespace:AutomatedSoundtrackSystem.MVVM.View">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -11,8 +13,20 @@
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowToolbarDropdownStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/ButtonStyle.xaml"/>
-                <ResourceDictionary Source="/MVVM/View/Styles/Components/TrackSelectorTemplate.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Components/TextBoxStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type viewModel:SessionSelectorViewModel}">
+                <view:SessionSelectorView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:TrackSelectorViewModel}">
+                <view:TrackSelector/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:SessionViewModel}">
+                <view:SessionView/>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

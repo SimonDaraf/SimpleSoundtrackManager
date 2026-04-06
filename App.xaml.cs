@@ -1,4 +1,5 @@
-﻿using AutomatedSoundtrackSystem.MVVM.View;
+﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
+using AutomatedSoundtrackSystem.MVVM.View;
 using AutomatedSoundtrackSystem.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -24,10 +25,16 @@ namespace AutomatedSoundtrackSystem
 
             // Declaration of all view models.
             services.AddSingleton<MainWindowViewModel>();
+            services.AddTransient<TrackSelectorViewModel>();
 
             // Declaration of all services.
 
             // Other misc declarations.
+            services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => track => {
+                TrackSelectorViewModel vm = provider.GetRequiredService<TrackSelectorViewModel>();
+                vm.Track = track;
+                return vm;
+            });
 
             // Build provider.
             serviceProvider = services.BuildServiceProvider();

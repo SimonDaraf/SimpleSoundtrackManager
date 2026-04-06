@@ -5,10 +5,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MVVM/View/Styles/ApplicationStyles.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Themes/Dark.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowControlButtonStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowToolbarDropdownStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Components/ButtonStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Components/TrackSelectorTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

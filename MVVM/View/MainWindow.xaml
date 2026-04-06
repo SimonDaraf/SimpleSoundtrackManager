@@ -7,10 +7,40 @@
         xmlns:local="clr-namespace:AutomatedSoundtrackSystem"
         mc:Ignorable="d"
         Style="{StaticResource ApplicationWindow}"
-        Title="MainWindow">
+        Title="SM" DataContext="AutomatedSoundtrackSystem.MVVM.ViewModel.MainWindowViewModel">
     <Grid>
-        <Grid Background="{StaticResource Tab}" Margin="10">
-
-        </Grid>
+        <Border Grid.Column="1" Background="{StaticResource Tab}" Margin="10" CornerRadius="{StaticResource CornerRadius}">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Padding="10, 10, 10, 0">
+                        <ItemsControl x:Name="ItemsControl" ItemTemplate="{StaticResource ItemCardTemplate}"
+                                      ItemsSource="{Binding Tracks}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+                <Border Grid.Row="1" BorderBrush="{StaticResource DropdownBorder}"
+                        Padding="0, 10, 0, 0"
+                        BorderThickness="0,1,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="1" Style="{StaticResource ButtonStyle}" Content="Add Track" Padding="10, 0" Height="25"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </appwindow:MainApplicationWindow>

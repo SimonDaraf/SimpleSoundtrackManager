@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AutomatedSoundtrackSystem.MVVM.Model.Utils
+namespace SimpleSoundtrackManager.MVVM.Model.Utils
 {
     /// <summary>
     /// <c>Class</c> Used to access SystemContextMenu.

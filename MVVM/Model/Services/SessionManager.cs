@@ -1,11 +1,11 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
-using AutomatedSoundtrackSystem.MVVM.Model.Utils;
+﻿using SimpleSoundtrackManager.MVVM.Model.Data;
+using SimpleSoundtrackManager.MVVM.Model.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using System.IO;
 using System.Windows;
 
-namespace AutomatedSoundtrackSystem.MVVM.Model.Services
+namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
     public class SessionManager
     {

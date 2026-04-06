@@ -1,13 +1,13 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
-using AutomatedSoundtrackSystem.MVVM.Model.Services;
-using AutomatedSoundtrackSystem.MVVM.View;
-using AutomatedSoundtrackSystem.MVVM.ViewModel;
+﻿using SimpleSoundtrackManager.MVVM.Model.Data;
+using SimpleSoundtrackManager.MVVM.Model.Services;
+using SimpleSoundtrackManager.MVVM.View;
+using SimpleSoundtrackManager.MVVM.ViewModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Windows;
 
-namespace AutomatedSoundtrackSystem
+namespace SimpleSoundtrackManager
 {
     /// <summary>
     /// Interaction logic for App.xaml

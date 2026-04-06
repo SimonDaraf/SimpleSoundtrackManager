@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace AutomatedSoundtrackSystem.MVVM.Model.Data
+namespace SimpleSoundtrackManager.MVVM.Model.Data
 {
     [MessagePackObject]
     public class Session

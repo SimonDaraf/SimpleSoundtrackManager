@@ -1,11 +1,11 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
-using AutomatedSoundtrackSystem.MVVM.View;
-using AutomatedSoundtrackSystem.MVVM.ViewModel;
+﻿using SimpleSoundtrackManager.MVVM.Model.Data;
+using SimpleSoundtrackManager.MVVM.View;
+using SimpleSoundtrackManager.MVVM.ViewModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 using System.Windows.Forms;
 
-namespace AutomatedSoundtrackSystem.MVVM.Model.Services
+namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
     public class NavigationService
     {

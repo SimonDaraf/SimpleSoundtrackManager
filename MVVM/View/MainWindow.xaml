@@ -1,13 +1,13 @@
-﻿<appwindow:MainApplicationWindow  xmlns:appwindow="clr-namespace:AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow"
-                                  x:Class="AutomatedSoundtrackSystem.MVVM.View.MainWindow"
+﻿<appwindow:MainApplicationWindow  xmlns:appwindow="clr-namespace:SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow"
+                                  x:Class="SimpleSoundtrackManager.MVVM.View.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AutomatedSoundtrackSystem"
+        xmlns:local="clr-namespace:SimpleSoundtrackManager"
         mc:Ignorable="d"
         Style="{StaticResource ApplicationWindow}"
-        Title="SSM" DataContext="AutomatedSoundtrackSystem.MVVM.ViewModel.MainWindowViewModel">
+        Title="SSM" DataContext="SimpleSoundtrackManager.MVVM.ViewModel.MainWindowViewModel">
     <Grid>
         <ContentPresenter Content="{Binding ActiveViewModel}"/>
     </Grid>

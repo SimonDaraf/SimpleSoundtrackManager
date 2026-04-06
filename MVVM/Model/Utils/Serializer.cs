@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutomatedSoundtrackSystem.MVVM.Model.Utils
+namespace SimpleSoundtrackManager.MVVM.Model.Utils
 {
     /// <summary>
     /// <c>Class</c> Used to serialize and deserialize data.

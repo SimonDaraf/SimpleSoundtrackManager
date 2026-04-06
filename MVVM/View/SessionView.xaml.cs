@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace AutomatedSoundtrackSystem.MVVM.View
+namespace SimpleSoundtrackManager.MVVM.View
 {
     /// <summary>
     /// Interaction logic for GroupView.xaml

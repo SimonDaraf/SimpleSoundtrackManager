@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.SettingsWindow
+namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.SettingsWindow
 {
     /// <summary>
     /// <c>Class</c> The settings application window class.

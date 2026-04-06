@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AutomatedSoundtrackSystem.MVVM.View
+namespace SimpleSoundtrackManager.MVVM.View
 {
     /// <summary>
     /// Interaction logic for SessionSelectorView.xaml

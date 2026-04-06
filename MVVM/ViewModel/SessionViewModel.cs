@@ -1,7 +1,7 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
+﻿using SimpleSoundtrackManager.MVVM.Model.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AutomatedSoundtrackSystem.MVVM.ViewModel
+namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
     public partial class SessionViewModel : ObservableObject
     {

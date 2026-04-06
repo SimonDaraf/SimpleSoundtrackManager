@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow
+namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
 {
     public partial class MainApplicationWindow : ApplicationWindow
     {

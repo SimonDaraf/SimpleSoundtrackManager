@@ -1,6 +1,6 @@
-﻿using AutomatedSoundtrackSystem.MVVM.View.CustomWindows.SettingsWindow;
+﻿using SimpleSoundtrackManager.MVVM.View.CustomWindows.SettingsWindow;
 
-namespace AutomatedSoundtrackSystem.MVVM.View
+namespace SimpleSoundtrackManager.MVVM.View
 {
     /// <summary>
     /// Interaction logic for OpenGroupWindow.xaml

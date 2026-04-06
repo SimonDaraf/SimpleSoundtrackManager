@@ -1,4 +1,4 @@
-﻿using AutomatedSoundtrackSystem.MVVM.View.CustomWindows.SettingsWindow;
+﻿using SimpleSoundtrackManager.MVVM.View.CustomWindows.SettingsWindow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace AutomatedSoundtrackSystem.MVVM.View
+namespace SimpleSoundtrackManager.MVVM.View
 {
     /// <summary>
     /// Interaction logic for CreateNewGroupWindow.xaml

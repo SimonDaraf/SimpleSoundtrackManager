@@ -1,9 +1,9 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Utils;
+﻿using SimpleSoundtrackManager.MVVM.Model.Utils;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows.AppWindow
+namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
 {
     public partial class MainApplicationWindow : ApplicationWindow
     {

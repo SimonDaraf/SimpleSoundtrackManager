@@ -1,4 +1,4 @@
-﻿namespace AutomatedSoundtrackSystem.MVVM.Model.Data
+﻿namespace SimpleSoundtrackManager.MVVM.Model.Data
 {
     public class Track
     {

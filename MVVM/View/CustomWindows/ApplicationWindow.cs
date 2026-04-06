@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace AutomatedSoundtrackSystem.MVVM.View.CustomWindows
+namespace SimpleSoundtrackManager.MVVM.View.CustomWindows
 {
     public abstract class ApplicationWindow : Window
     {

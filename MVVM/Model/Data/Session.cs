@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using System.Windows.Media;
 
 namespace AutomatedSoundtrackSystem.MVVM.Model.Data
 {
@@ -11,6 +10,9 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Data
 
         [Key(1)]
         public string Path { get; set; } = string.Empty;
+
+        [Key(2)]
+        public List<Track> Tracks { get; set; } = [];
 
         [IgnoreMember]
         public string LastModified { get; set; } = string.Empty;

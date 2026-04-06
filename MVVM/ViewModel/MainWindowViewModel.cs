@@ -1,4 +1,5 @@
 ﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
+using AutomatedSoundtrackSystem.MVVM.Model.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
@@ -6,20 +7,20 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        private readonly NavigationService navigationService;
+
         [ObservableProperty]
-        private ObservableCollection<TrackSelectorViewModel> tracks;
+        private ObservableObject? activeViewModel;
 
-        public MainWindowViewModel(Func<Track, TrackSelectorViewModel> factory)
+        public MainWindowViewModel(NavigationService navigationService)
         {
-            tracks = new ObservableCollection<TrackSelectorViewModel>();
+            this.navigationService = navigationService;
+            navigationService.OnNavigationRequested += NavigationService_OnNavigationRequested;
+        }
 
-            for (int i = 0; i < 16 ; i++)
-            {
-                tracks.Add(factory.Invoke(new Track
-                {
-                    Name = "Långt Namn"
-                }));
-            }
+        private void NavigationService_OnNavigationRequested(object? sender, ObservableObject e)
+        {
+            ActiveViewModel = e;
         }
     }
 }

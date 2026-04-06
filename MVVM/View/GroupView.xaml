@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="AutomatedSoundtrackSystem.MVVM.View.GroupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AutomatedSoundtrackSystem.MVVM.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Hidden"
+              HorizontalScrollBarVisibility="Disabled"
+              Padding="10, 10, 10, 0">
+                <ItemsControl x:Name="ItemsControl" ItemTemplate="{StaticResource ItemCardTemplate}"
+                  ItemsSource="{Binding Tracks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        <Border Grid.Row="1" BorderBrush="{StaticResource DropdownBorder}"
+    Padding="0, 10, 0, 0"
+    BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1" Style="{StaticResource ButtonStyle}" Content="Add Track" Padding="10, 0" Height="25"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

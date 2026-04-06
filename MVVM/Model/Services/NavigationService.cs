@@ -1,20 +1,40 @@
-﻿using AutomatedSoundtrackSystem.MVVM.View;
+﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
+using AutomatedSoundtrackSystem.MVVM.View;
+using AutomatedSoundtrackSystem.MVVM.ViewModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace AutomatedSoundtrackSystem.MVVM.Model.Services
 {
     public class NavigationService
     {
-        private Func<Window> openGroupWindow;
+        private readonly Func<NavigationViews, ObservableObject> tryNavigate;
 
-        public NavigationService(Func<OpenGroupWindow> openGroupWindow)
+        public event EventHandler<ObservableObject>? OnNavigationRequested;
+
+        public NavigationService(Func<NavigationViews, ObservableObject> tryNavigate)
         {
-            this.openGroupWindow = openGroupWindow;
+            this.tryNavigate = tryNavigate;
         }
 
-        public Window OpenGroupWindow()
+        public ObservableObject NavigateToViewModel(NavigationViews view)
         {
-            return openGroupWindow.Invoke();
+            return tryNavigate(view);
         }
+
+        public void RequestNavigationToGroup(Group group)
+        {
+            if (tryNavigate(NavigationViews.GroupView) is GroupViewModel vm)
+            {
+                vm.Group = group;
+                OnNavigationRequested?.Invoke(this, vm);
+            }
+        }
+    }
+
+    public enum NavigationViews
+    {
+        GroupView
     }
 }

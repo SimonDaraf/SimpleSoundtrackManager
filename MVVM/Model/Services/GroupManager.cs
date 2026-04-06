@@ -68,9 +68,9 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
         }
 
         /// <summary>
-        /// Tries to create a new group and returns whether the operation was successful.
+        /// Tries to create a new group and returns the created group.
         /// </summary>
-        public bool CreateNewGroup(string name)
+        public Group? CreateNewGroup(string name)
         {
             try
             {
@@ -89,12 +89,12 @@ namespace AutomatedSoundtrackSystem.MVVM.Model.Services
                 };
 
                 Serializer.ToBinary(group, finalPath);
-                return true;
+                return null;
             }
             catch (Exception ex)
             {
                 logger.LogError("Failed to write file.", [ex]);
-                return false;
+                return null;
             }
         }
 

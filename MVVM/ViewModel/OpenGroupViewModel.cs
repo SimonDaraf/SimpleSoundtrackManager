@@ -11,8 +11,6 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
         private readonly GroupManager groupManager;
         private readonly NavigationService navigationService;
 
-        public Action? CloseWindow { get; set; }
-
         public OpenGroupViewModel(GroupManager groupManager, NavigationService navigationService)
         {
             this.groupManager = groupManager;
@@ -20,7 +18,16 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
         }
 
         [RelayCommand]
-        private void BrowseGroup()
+        private void CreateNewGroup(Window current)
+        {
+            Window createWindow = navigationService.GetCreateNewWindow();
+            current.Close();
+            createWindow.Owner = App.Current.MainWindow;
+            createWindow.ShowDialog();
+        }
+
+        [RelayCommand]
+        private void BrowseGroup(Window window)
         {
             Group? group = groupManager.BrowseGroup();
 
@@ -30,7 +37,7 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
             }
 
             navigationService.RequestNavigationToGroup(group);
-            CloseWindow?.Invoke();
+            window.Close();
         }
     }
 }

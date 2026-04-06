@@ -19,9 +19,11 @@
         <StackPanel Orientation="Horizontal" Margin="10, 0">
             <Menu Background="Transparent" Height="20" VerticalAlignment="Center">
                 <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                          Header="New" VerticalAlignment="Top" Margin="0, 0, 10, 0"/>
+                          Header="New" VerticalAlignment="Top" Margin="0, 0, 10, 0"
+                          Command="{Binding CreateNewGroupCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
                 <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                          Header="Browse" VerticalAlignment="Top" Command="{Binding BrowseGroupCommand}"/>
+                          Header="Browse" VerticalAlignment="Top" Command="{Binding BrowseGroupCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
             </Menu>
         </StackPanel>
         <Border Grid.Row="1" BorderThickness="0, 1, 0, 0" BorderBrush="{StaticResource DropdownBorder}">

@@ -34,20 +34,21 @@ namespace AutomatedSoundtrackSystem
                 DataContext = provider.GetRequiredService<MainWindowViewModel>()
             });
 
-            services.AddTransient(provider =>
+            services.AddTransient(provider => new OpenGroupWindow
             {
-                OpenGroupWindow window = new OpenGroupWindow();
+                DataContext = provider.GetRequiredService<OpenGroupViewModel>()
+            });
 
-                OpenGroupViewModel vm = provider.GetRequiredService<OpenGroupViewModel>();
-                window.DataContext = vm;
-                vm.CloseWindow = window.Close;
-                return window;
+            services.AddTransient(provider => new CreateNewGroupWindow
+            {
+                DataContext = provider.GetRequiredService<CreateNewGroupViewModel>()
             });
 
             // Declaration of all view models.
             services.AddSingleton<MainWindowViewModel>();
             services.AddTransient<TrackSelectorViewModel>();
             services.AddTransient<OpenGroupViewModel>();
+            services.AddTransient<CreateNewGroupViewModel>();
             services.AddKeyedTransient<GroupViewModel>(NavigationViews.GroupView);
 
             // Declaration of all services.
@@ -62,6 +63,7 @@ namespace AutomatedSoundtrackSystem
             });
 
             services.AddTransient<Func<NavigationViews, ObservableObject>>(provider => key => provider.GetRequiredKeyedService<ObservableObject>(key));
+            services.AddTransient<Func<CreateNewGroupWindow>>(provider => () => provider.GetRequiredService<CreateNewGroupWindow>());
 
             // Build provider.
             serviceProvider = services.BuildServiceProvider();

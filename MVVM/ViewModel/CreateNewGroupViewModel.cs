@@ -1,11 +1,8 @@
-﻿using AutomatedSoundtrackSystem.MVVM.Model.Services;
+﻿using AutomatedSoundtrackSystem.MVVM.Model.Data;
+using AutomatedSoundtrackSystem.MVVM.Model.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace AutomatedSoundtrackSystem.MVVM.ViewModel
 {
@@ -14,6 +11,9 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
         private readonly GroupManager groupManager;
         private readonly NavigationService navigationService;
 
+        [ObservableProperty]
+        private string name = string.Empty;
+
         public CreateNewGroupViewModel(GroupManager groupManager, NavigationService navigationService)
         {
             this.groupManager = groupManager;
@@ -21,9 +21,18 @@ namespace AutomatedSoundtrackSystem.MVVM.ViewModel
         }
 
         [RelayCommand]
-        private void CreateNewGroup()
+        private void CreateNewGroup(Window window)
         {
+            Group? group = groupManager.CreateNewGroup(Name);
 
+            if (group is null)
+            {
+                MessageBox.Show("Failed to create new group.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            navigationService.RequestNavigationToGroup(group);
+            window.Close();
         }
     }
 }

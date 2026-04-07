@@ -162,6 +162,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 {
                     Track track = new Track
                     {
+                        Name = openFileDialog.SafeFileName,
                         FilePath = selectedPath,
                     };
                     return track;
@@ -194,6 +195,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
                     Track track = new Track
                     {
+                        Name = openFileDialog.SafeFileName,
                         FilePath = destPath,
                     };
                     return track;

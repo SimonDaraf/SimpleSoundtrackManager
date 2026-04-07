@@ -4,21 +4,30 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleSoundtrackManager.MVVM.View"
-             mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="800">
-    <Border BorderBrush="{StaticResource DropdownBorder}" BorderThickness="0, 0, 0, 1" Height="100" Margin="0, 0, 0, 5">
+             mc:Ignorable="d" d:DesignWidth="800">
+    <Border BorderBrush="{Binding BrushColor}" BorderThickness="0, 0, 0, 1" Margin="0, 0, 0, 5" Background="{Binding TrackGradientBrush}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Track.Name}" VerticalAlignment="Center" FontSize="14" Margin="10, 0" Foreground="{StaticResource Foreground}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding Track.Name}" VerticalAlignment="Center" FontSize="14" Margin="10, 0" Foreground="{StaticResource Foreground}"
+                            Style="{StaticResource TextBoxStyle}"/>
+                    <Button Grid.Column="1" Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"
+                            Command="{Binding OpenColorPickerCommand}" Margin="5"/>
+                </Grid>
+                
                 <Menu Grid.Column="2" Height="20" Background="Transparent" VerticalAlignment="Center" Margin="10, 0">
                     <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}" Header="Edit">
                         <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
@@ -28,6 +37,10 @@
                                   Command="{Binding DeleteCommand}"/>
                     </MenuItem>
                 </Menu>
+            </Grid>
+
+            <Grid Grid.Row="1" Height="100">
+                
             </Grid>
         </Grid>
     </Border>

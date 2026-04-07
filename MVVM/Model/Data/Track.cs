@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using System.Windows.Media;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Data
 {
@@ -19,5 +20,37 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
 
         [Key(4)]
         public long TransitionLength { get; set; }
+
+        [Key(5)]
+        public SerializableColor TrackColor { get; set; } = new SerializableColor();
+
+        public void SetColor(Color color)
+        {
+            TrackColor = new SerializableColor
+            {
+                Red = color.R,
+                Green = color.G,
+                Blue = color.B,
+            };
+        }
+    }
+
+    [MessagePackObject]
+    public class SerializableColor
+    {
+        [Key(0)]
+        public byte Red { get; set; } = 255;
+
+        [Key(1)]
+        public byte Green { get; set; } = 255;
+
+        [Key(2)]
+        public byte Blue { get; set; } = 255;
+
+        [IgnoreMember]
+        public Color Color { get => Color.FromRgb(Red, Green, Blue); }
+
+        [IgnoreMember]
+        public SolidColorBrush BrushColor { get => new SolidColorBrush(Color); }
     }
 }

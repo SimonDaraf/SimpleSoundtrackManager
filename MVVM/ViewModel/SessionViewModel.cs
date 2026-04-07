@@ -30,6 +30,19 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             tracks = new ObservableCollection<TrackSelectorViewModel>();
 
             sessionTracker.OnTrackAdded += SessionTracker_OnTrackAdded;
+            sessionTracker.OnTrackRemoved += SessionTracker_OnTrackRemoved;
+        }
+
+        private void SessionTracker_OnTrackRemoved(object? sender, Track e)
+        {
+            foreach (TrackSelectorViewModel vm in Tracks)
+            {
+                if (vm.Track is not null && vm.Track.Equals(e))
+                {
+                    Tracks.Remove(vm);
+                    return;
+                }
+            }
         }
 
         private void SessionTracker_OnTrackAdded(object? sender, Track e)
@@ -49,7 +62,6 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             if (track is not null)
             {
                 sessionTracker.AddTrack(track);
-                navigationService.RequestNavigationToTrack(track);
             }
         }
 

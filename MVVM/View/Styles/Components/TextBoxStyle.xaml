@@ -6,7 +6,7 @@
                 <ControlTemplate TargetType="TextBox">
                     <Border BorderBrush="{StaticResource DropdownBorder}" BorderThickness="1" Margin="{TemplateBinding Margin}">
                         <TextBox Background="Transparent" BorderThickness="0" IsReadOnly="{TemplateBinding IsReadOnly}"
-                                 Text="{TemplateBinding Text}" Foreground="{StaticResource Foreground}"/>
+                                 Text="{TemplateBinding Text}" Foreground="{StaticResource Foreground}" CaretBrush="{StaticResource Foreground}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

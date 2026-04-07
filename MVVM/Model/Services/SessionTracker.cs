@@ -12,6 +12,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         public event EventHandler<Session>? OnBeforeSessionChanged;
         public event EventHandler<Session>? OnSessionOpened;
         public event EventHandler<Track>? OnTrackAdded;
+        public event EventHandler<Track>? OnTrackRemoved;
 
         public Session? ActiveSession { get; private set; }
 
@@ -58,6 +59,21 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
             ActiveSession.Tracks.Add(track);
             OnTrackAdded?.Invoke(this, track);
+        }
+
+        public void RemoveTrackFromActiveSesion(Track track)
+        {
+            if (ActiveSession is null) return;
+
+            foreach (Track t in ActiveSession.Tracks)
+            {
+                if (t.Equals(track))
+                {
+                    ActiveSession.Tracks.Remove(t);
+                    OnTrackRemoved?.Invoke(this, t);
+                    return;
+                }
+            }
         }
     }
 }

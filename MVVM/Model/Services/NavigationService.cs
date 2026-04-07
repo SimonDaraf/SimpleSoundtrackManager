@@ -48,17 +48,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
-        public void RequestNavigationToTrack(Track track)
-        {
-            if (tryNavigate(NavigationViews.TrackView) is TrackEditorViewModel vm)
-            {
-                vm.Track = track;
-                stack.Push(vm);
-                vm.OnNavigation();
-                OnNavigationRequested?.Invoke(this, vm);
-            }
-        }
-
         public void TryPopViewFromStack()
         {
             stack.Pop();
@@ -69,6 +58,5 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
     public enum NavigationViews
     {
         SessionView,
-        TrackView
     }
 }

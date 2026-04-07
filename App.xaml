@@ -27,10 +27,6 @@
             <DataTemplate DataType="{x:Type viewModel:SessionViewModel}">
                 <view:SessionView/>
             </DataTemplate>
-
-            <DataTemplate DataType="{x:Type viewModel:TrackEditorViewModel}">
-                <view:TrackEditorView/>
-            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

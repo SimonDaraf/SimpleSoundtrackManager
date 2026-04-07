@@ -7,7 +7,8 @@
         xmlns:local="clr-namespace:SimpleSoundtrackManager"
         mc:Ignorable="d"
         Style="{StaticResource ApplicationWindow}"
-        Title="SSM" DataContext="SimpleSoundtrackManager.MVVM.ViewModel.MainWindowViewModel">
+        Title="{Binding Title}" 
+        DataContext="SimpleSoundtrackManager.MVVM.ViewModel.MainWindowViewModel">
     <Grid>
         <ContentPresenter Content="{Binding ActiveViewModel}"/>
     </Grid>

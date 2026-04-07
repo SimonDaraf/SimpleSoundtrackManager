@@ -24,6 +24,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [IgnoreMember]
         public bool IsDirty { get; private set; }
 
+        public event EventHandler<bool>? OnDirtyStateChanged;
+
         public void Initialize()
         {
             Tracks.CollectionChanged += Tracks_CollectionChanged;
@@ -37,6 +39,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         private void Tracks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             MakeDirty();
+            OnDirtyStateChanged?.Invoke(this, true);
         }
 
         private void MakeDirty()
@@ -47,6 +50,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         public void MarkClean()
         {
             IsDirty = false;
+            OnDirtyStateChanged?.Invoke(this, false);
         }
     }
 }

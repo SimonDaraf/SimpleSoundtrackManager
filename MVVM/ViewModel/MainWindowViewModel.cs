@@ -16,12 +16,41 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private ObservableObject? activeViewModel;
 
+        [ObservableProperty]
+        private string title = "SSM";
+
         public MainWindowViewModel(NavigationService navigationService, SessionManager sessionManager, SessionTracker sessionTracker)
         {
             this.navigationService = navigationService;
             this.sessionManager = sessionManager;
             this.sessionTracker = sessionTracker;
             navigationService.OnNavigationRequested += NavigationService_OnNavigationRequested;
+
+            sessionTracker.OnBeforeSessionChanged += SessionTracker_OnBeforeSessionChanged;
+            sessionTracker.OnSessionOpened += SessionTracker_OnSessionOpened;
+        }
+
+        private void SessionTracker_OnBeforeSessionChanged(object? sender, Session e)
+        {
+            // Unhook before changing.
+            if (sessionTracker.ActiveSession is not null)
+            {
+                sessionTracker.ActiveSession.OnDirtyStateChanged -= ActiveSession_OnDirtyStateChanged;
+            }
+        }
+
+        private void SessionTracker_OnSessionOpened(object? sender, Session e)
+        {
+            if (sessionTracker.ActiveSession is not null)
+            {
+                sessionTracker.ActiveSession.OnDirtyStateChanged += ActiveSession_OnDirtyStateChanged;
+                Title = sessionTracker.ActiveSession.Name;
+            }
+        }
+
+        private void ActiveSession_OnDirtyStateChanged(object? sender, bool e)
+        {
+            Title = e ? $"{Title}*" : Title.Replace("*", "");
         }
 
         private void NavigationService_OnNavigationRequested(object? sender, ObservableObject e)
@@ -57,17 +86,24 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [RelayCommand]
         private void SaveSession()
         {
-
+            Session? session = sessionTracker.ActiveSession;
+            if (session is not null && session.IsDirty)
+            {
+                session.MarkClean();
+                Serializer.ToBinary(session, session.FullPath);
+            }
         }
 
         [RelayCommand]
         private void SaveSessionAs()
         {
-            Session? session = sessionTracker.ActiveSession;
-            if (session is not null && session.IsDirty)
-            {
-                Serializer.ToBinary(session, session.FullPath);
-            }
+            
+        }
+
+        [RelayCommand]
+        private void Exit()
+        {
+            App.Current.Shutdown();
         }
 
         private MessageBoxResult TrySaveChanges()

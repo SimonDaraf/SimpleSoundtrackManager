@@ -64,16 +64,19 @@
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Save"
                                                       Height="20"
-                                                      VerticalAlignment="Top"/>
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=SaveSessionCommand}"/>
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Save As..."
                                                       Height="20"
-                                                      VerticalAlignment="Top"/>
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=SaveSessionAsCommand}"/>
                                             <Separator Style="{StaticResource MenuSeparatorStyle}"/>
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Exit"
                                                       Height="20"
-                                                      VerticalAlignment="Top"/>
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=ExitCommand}"/>
                                         </MenuItem>
                                         <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
                                                   Header="Edit"

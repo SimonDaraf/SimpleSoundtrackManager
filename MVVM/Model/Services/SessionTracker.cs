@@ -9,6 +9,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
     /// </summary>
     public class SessionTracker
     {
+        public event EventHandler<Session>? OnBeforeSessionChanged;
         public event EventHandler<Session>? OnSessionOpened;
         public event EventHandler<Track>? OnTrackAdded;
 
@@ -38,7 +39,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public void SetActiveSession(Session session)
         {
-            if (ActiveSession is not null) ActiveSession.Invalidate();
+            if (ActiveSession is not null)
+            {
+                OnBeforeSessionChanged?.Invoke(this, session);
+                ActiveSession.Invalidate();
+            }
 
             ActiveSession = session;
             ActiveSession.Initialize();

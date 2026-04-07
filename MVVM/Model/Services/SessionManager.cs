@@ -1,9 +1,10 @@
-﻿using SimpleSoundtrackManager.MVVM.Model.Data;
-using SimpleSoundtrackManager.MVVM.Model.Utils;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using SimpleSoundtrackManager.MVVM.Model.Data;
+using SimpleSoundtrackManager.MVVM.Model.Utils;
 using System.IO;
 using System.Windows;
+using System.Windows.Documents;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
@@ -15,7 +16,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         public SessionManager(ILogger<SessionManager> logger)
         {
             this.logger = logger;
-            directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SoundtrackManager");
+            directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SimpleSoundtrackManager");
             ValidateDirectoryPath();
         }
 
@@ -27,11 +28,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
-        private Session? LoadGroup(string path)
+        private Session? LoadSession(string path)
         {
             try
             {
-                return Serializer.Deserialize<Session>(path);
+                Session session = Serializer.Deserialize<Session>(path);
+                return session;
             }
             catch (Exception ex)
             {
@@ -55,7 +57,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         {
             // Get all recent files in base directory.
             FileInfo[] files = [.. new DirectoryInfo(directory)
-                .GetFiles("*.sm", SearchOption.AllDirectories)
+                .GetFiles("*.ssm", SearchOption.AllDirectories)
                 .OrderBy(f => f.LastWriteTime)];
 
             List<Session> sessions = [];
@@ -96,16 +98,17 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 }
             }
 
-            string finalPath = Path.Combine(path, $"{name}.sm");
+            string finalPath = Path.Combine(path, $"{name}.ssm");
 
-            Session group = new Session
+            Session session = new Session
             {
                 Name = name,
-                Path = finalPath
+                FullPath = finalPath,
+                DirectoryPath = Path.GetDirectoryName(finalPath) ?? throw new Exception("Invalid file path state.")
             };
 
-            Serializer.ToBinary(group, finalPath);
-            return group;
+            Serializer.ToBinary(session, finalPath);
+            return session;
         }
 
         /// <summary>
@@ -115,14 +118,20 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = false;
-            openFileDialog.Filter = "SM Session Files (*.sm)|*.sm";
+            openFileDialog.Filter = "SSM Session Files (*.ssm)|*.ssm";
             openFileDialog.InitialDirectory = directory;
 
             bool? result = openFileDialog.ShowDialog();
 
             if (result == true)
             {
-                return LoadGroup(openFileDialog.FileName);
+                Session? session = LoadSession(openFileDialog.FileName);
+                if (session is null) return session; // Dont continue.
+
+                // Make sure all paths are up to date internally.
+                session.FullPath = openFileDialog.FileName;
+                session.DirectoryPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid file path state.");
+                return session;
             } else if (result == false)
             {
                 return null;
@@ -130,6 +139,72 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             {
                 logger.LogWarning("Failed to load session file.");
                 MessageBox.Show("Failed to load session.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+        }
+
+        public Track? CreateNewTrack(Session session)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = false;
+            openFileDialog.Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav";
+            openFileDialog.InitialDirectory = session.DirectoryPath;
+
+            bool? result = openFileDialog.ShowDialog();
+
+            if (result == true)
+            {
+                string audioDirectory = Path.Combine(session.DirectoryPath, "AudioFiles");
+                string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
+
+                // If audio file is already in correct directory. No need to copy it.
+                if (audioDirectory == selectedPath)
+                {
+                    Track track = new Track
+                    {
+                        FilePath = selectedPath,
+                    };
+                    return track;
+                }
+                else
+                {
+                    if (!Directory.Exists(audioDirectory))
+                    {
+                        Directory.CreateDirectory(audioDirectory);
+                    }
+
+                    string destPath = Path.Combine(audioDirectory, openFileDialog.SafeFileName);
+
+                    if (File.Exists(destPath))
+                    {
+                        int num = 0;
+                        string fixedPath;
+                        string dir = Path.GetDirectoryName(destPath) ?? throw new Exception("Invalid path state");
+                        string name = Path.GetFileNameWithoutExtension(destPath);
+                        string ext = Path.GetExtension(destPath);
+                        do
+                        {
+                            fixedPath = Path.Combine(dir, $"{name}_{num}{ext}");
+                            num++;
+                        } while (File.Exists(fixedPath));
+                        destPath = fixedPath;
+                    }
+
+                    File.Copy(openFileDialog.FileName, destPath);
+
+                    Track track = new Track
+                    {
+                        FilePath = destPath,
+                    };
+                    return track;
+                }
+            } if (result is null)
+            {
+                logger.LogWarning("Failed to open audio file.");
+                MessageBox.Show("Failed to open audio file.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            } else
+            {
                 return null;
             }
         }

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Windows;
+using SimpleSoundtrackManager.MVVM.Model;
 
 namespace SimpleSoundtrackManager
 {
@@ -56,11 +57,13 @@ namespace SimpleSoundtrackManager
             services.AddTransient<OpenSessionViewModel>();
             services.AddTransient<CreateNewSessionViewModel>();
             services.AddTransient<SessionSelectorViewModel>();
-            services.AddKeyedTransient<ObservableObject, SessionViewModel>(NavigationViews.SessionView);
+            services.AddKeyedTransient<NavigatableViewModel, SessionViewModel>(NavigationViews.SessionView);
+            services.AddKeyedTransient<NavigatableViewModel, TrackEditorViewModel>(NavigationViews.TrackView);
 
             // Declaration of all services.
             services.AddSingleton<NavigationService>();
             services.AddSingleton<SessionManager>();
+            services.AddSingleton<SessionTracker>();
 
             // Other misc declarations.
             services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => track => {
@@ -69,9 +72,10 @@ namespace SimpleSoundtrackManager
                 return vm;
             });
 
-            services.AddTransient<Func<NavigationViews, ObservableObject>>(provider => key => provider.GetRequiredKeyedService<ObservableObject>(key));
+            services.AddTransient<Func<NavigationViews, NavigatableViewModel>>(provider => key => provider.GetRequiredKeyedService<NavigatableViewModel>(key));
             services.AddTransient<Func<CreateNewSessionWindow>>(provider => () => provider.GetRequiredService<CreateNewSessionWindow>());
             services.AddTransient<Func<SessionSelectorViewModel>>(provider => () => provider.GetRequiredService<SessionSelectorViewModel>());
+            services.AddTransient<Func<TrackSelectorViewModel>>(provider => () => provider.GetRequiredService<TrackSelectorViewModel>());
 
             // Build provider.
             serviceProvider = services.BuildServiceProvider();

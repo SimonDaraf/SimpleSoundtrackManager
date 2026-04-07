@@ -1,11 +1,68 @@
 ﻿using SimpleSoundtrackManager.MVVM.Model.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SimpleSoundtrackManager.MVVM.Model.Services;
+using System.Collections.ObjectModel;
+using SimpleSoundtrackManager.MVVM.Model;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
-    public partial class SessionViewModel : ObservableObject
+    public partial class SessionViewModel : NavigatableViewModel
     {
+        private readonly SessionManager sessionManager;
+        private readonly NavigationService navigationService;
+        private readonly SessionTracker sessionTracker;
+        private readonly Func<TrackSelectorViewModel> selectorFactory;
+
         [ObservableProperty]
         private Session? session;
+
+        [ObservableProperty]
+        private ObservableCollection<TrackSelectorViewModel> tracks;
+
+        public SessionViewModel(SessionManager sessionManager, NavigationService navigationService, SessionTracker sessionTracker,
+            Func<TrackSelectorViewModel> selectorFactory)
+        {
+            this.sessionManager = sessionManager;
+            this.navigationService = navigationService;
+            this.sessionTracker = sessionTracker;
+            this.selectorFactory = selectorFactory;
+            tracks = new ObservableCollection<TrackSelectorViewModel>();
+
+            sessionTracker.OnTrackAdded += SessionTracker_OnTrackAdded;
+        }
+
+        private void SessionTracker_OnTrackAdded(object? sender, Track e)
+        {
+            TrackSelectorViewModel vm = selectorFactory();
+            vm.Track = e;
+            Tracks.Add(vm);
+        }
+
+        [RelayCommand]
+        private void AddNewTrack()
+        {
+            if (Session == null) return;
+
+            Track? track = sessionManager.CreateNewTrack(Session);
+
+            if (track is not null)
+            {
+                sessionTracker.AddTrack(track);
+                navigationService.RequestNavigationToTrack(track);
+            }
+        }
+
+        public override void OnNavigation()
+        {
+            if (Session is null) return;
+
+            foreach (Track track in Session.Tracks)
+            {
+                TrackSelectorViewModel vm = selectorFactory();
+                vm.Track = track;
+                Tracks.Add(vm);
+            }
+        }
     }
 }

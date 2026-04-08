@@ -37,7 +37,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             if (Track is null) return;
             BrushColor = new SolidColorBrush(Track.TrackColor.Color);
             Color transparent = Color.FromArgb(0, Track.TrackColor.Color.R, Track.TrackColor.Color.G, Track.TrackColor.Color.B);
-            Color subOpacity = Color.FromArgb(25, Track.TrackColor.Color.R, Track.TrackColor.Color.G, Track.TrackColor.Color.B);
+            Color subOpacity = Color.FromArgb(5, Track.TrackColor.Color.R, Track.TrackColor.Color.G, Track.TrackColor.Color.B);
             TrackGradientBrush = new LinearGradientBrush(
                 [
                     new GradientStop(transparent, 0),

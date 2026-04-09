@@ -19,12 +19,15 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         public long LoopPoint { get; set; }
 
         [Key(4)]
-        public long TransitionLength { get; set; }
+        public long TrackLength { get; set; }
 
         [Key(5)]
-        public int TrackVolume { get; set; }
+        public long TransitionLength { get; set; }
 
         [Key(6)]
+        public int TrackVolume { get; set; }
+
+        [Key(7)]
         public SerializableColor TrackColor { get; set; } = new SerializableColor();
 
         public void SetColor(Color color)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using NAudio.Wave;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Utils;
 using System.IO;
@@ -157,6 +158,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 string audioDirectory = Path.Combine(session.DirectoryPath, "AudioFiles");
                 string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
 
+                long length = GetTrackLengthFromfile(openFileDialog.FileName);
+
                 // If audio file is already in correct directory. No need to copy it.
                 if (audioDirectory == selectedPath)
                 {
@@ -164,6 +167,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                     {
                         Name = openFileDialog.SafeFileName,
                         FilePath = selectedPath,
+                        LoopPoint = length,
+                        TrackLength = length,
                     };
                     return track;
                 }
@@ -197,6 +202,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                     {
                         Name = openFileDialog.SafeFileName,
                         FilePath = destPath,
+                        LoopPoint = length,
+                        TrackLength = length,
                     };
                     return track;
                 }
@@ -209,6 +216,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             {
                 return null;
             }
+        }
+
+        private long GetTrackLengthFromfile(string filePath)
+        {
+            using AudioFileReader audio = new AudioFileReader(filePath);
+            return audio.Length;
         }
     }
 }

@@ -63,6 +63,7 @@ namespace SimpleSoundtrackManager
             services.AddSingleton<NavigationService>();
             services.AddSingleton<SessionManager>();
             services.AddSingleton<SessionTracker>();
+            services.AddSingleton<AudioPlayer>();
 
             // Other misc declarations.
             services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => track => {

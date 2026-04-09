@@ -12,6 +12,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
     public partial class TrackSelectorViewModel : ObservableObject
     {
         private readonly SessionTracker sessionTracker;
+        private readonly AudioPlayer audioPlayer;
 
         [ObservableProperty]
         private Track? track;
@@ -20,11 +21,17 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private SolidColorBrush brushColor = new SolidColorBrush();
 
         [ObservableProperty]
+        private string playbackState = "Play";
+
+        [ObservableProperty]
         private LinearGradientBrush trackGradientBrush = new LinearGradientBrush();
 
-        public TrackSelectorViewModel(SessionTracker sessionTracker)
+        private bool isSource;
+
+        public TrackSelectorViewModel(SessionTracker sessionTracker, AudioPlayer audioPlayer)
         {
             this.sessionTracker = sessionTracker;
+            this.audioPlayer = audioPlayer;
         }
 
         partial void OnTrackChanged(Track? value)
@@ -62,6 +69,30 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 SKColor color = pickerWindow.SelectedColor;
                 Track.SetColor(Color.FromRgb(color.Red, color.Green, color.Blue));
                 UpdateColors();
+            }
+        }
+
+        [RelayCommand]
+        private void TogglePlayback()
+        {
+            if (Track is null) return;
+            if (audioPlayer.IsPlaying)
+            {
+                if (!isSource)
+                {
+                    audioPlayer.Stop();
+                    audioPlayer.Play(Track);
+                    PlaybackState = "Stop";
+                    isSource = true;
+                }
+                audioPlayer.Stop();
+                PlaybackState = "Play";
+                isSource = false;
+            } else
+            {
+                audioPlayer.Play(Track);
+                PlaybackState = "Stop";
+                isSource = true;
             }
         }
     }

@@ -1,15 +1,11 @@
 ﻿using NAudio.Wave;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NAudio.Wave.SampleProviders;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
 {
-    public class LoopStream : WaveStream
+    public class LoopStream : IWaveProvider, IDisposable
     {
-        WaveStream sourceStream;
+        private WaveStream sourceStream;
 
         public long StartPosition { get; set; } = 0;
         public long LoopPosition { get; set; }
@@ -20,23 +16,23 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             LoopPosition = stream.Length;
         }
 
-        public override long Length
+        public long Length
         {
             get { return sourceStream.Length; }
         }
 
-        public override long Position
+        public long Position
         {
             get { return sourceStream.Position; }
             set { sourceStream.Position = value; }
         }
 
-        public override WaveFormat WaveFormat
+        public WaveFormat WaveFormat
         {
             get { return sourceStream.WaveFormat; }
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        public int Read(byte[] buffer, int offset, int count)
         {
             // https://markheath.net/post/looped-playback-in-net-with-naudio
             int totalBytesRead = 0;
@@ -58,6 +54,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             }
 
             return totalBytesRead;
+        }
+
+        public void Dispose()
+        {
+            sourceStream.Dispose();
         }
     }
 }

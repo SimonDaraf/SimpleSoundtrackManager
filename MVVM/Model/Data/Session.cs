@@ -29,6 +29,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         public void Initialize()
         {
             Tracks.CollectionChanged += Tracks_CollectionChanged;
+            foreach (Track t in Tracks)
+            {
+                t.OnTrackChanged += InternalTrackChanged;
+            }
         }
 
         public void Invalidate()
@@ -39,16 +43,37 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         private void Tracks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             MakeDirty();
-            OnDirtyStateChanged?.Invoke(this, true);
+            if (e.OldItems is not null)
+            {
+                foreach (Track t in e.OldItems)
+                {
+                    t.OnTrackChanged -= InternalTrackChanged;
+                }
+            }
+            if (e.NewItems is not null)
+            {
+                foreach (Track t in e.NewItems)
+                {
+                    t.OnTrackChanged += InternalTrackChanged;
+                }
+            }
+        }
+
+        private void InternalTrackChanged(object? sender, EventArgs e)
+        {
+            MakeDirty();
         }
 
         private void MakeDirty()
         {
+            if (IsDirty) return;
             IsDirty = true;
+            OnDirtyStateChanged?.Invoke(this, true);
         }
 
         public void MarkClean()
         {
+            if (!IsDirty) return;
             IsDirty = false;
             OnDirtyStateChanged?.Invoke(this, false);
         }

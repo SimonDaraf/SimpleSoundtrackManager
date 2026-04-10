@@ -1,12 +1,14 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style TargetType="TextBox" x:Key="TextBoxStyle">
+        <Setter Property="CaretBrush" Value="{StaticResource Foreground}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border BorderBrush="{StaticResource DropdownBorder}" BorderThickness="1">
-                        <TextBox Background="Transparent" BorderThickness="0" IsReadOnly="{TemplateBinding IsReadOnly}"
-                                 Text="{TemplateBinding Text}" Foreground="{StaticResource Foreground}" CaretBrush="{StaticResource Foreground}"/>
+                    <Border BorderBrush="{StaticResource DropdownBorder}" BorderThickness="1"
+                        Background="{StaticResource Dropdown}">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                  Foreground="{StaticResource Foreground}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

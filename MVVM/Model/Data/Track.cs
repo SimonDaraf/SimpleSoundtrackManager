@@ -1,34 +1,45 @@
-﻿using MessagePack;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MessagePack;
 using System.Windows.Media;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Data
 {
-    [MessagePackObject]
-    public class Track
+    [MessagePackObject(AllowPrivate = true)]
+    public partial class Track : ObservableObject
     {
+        public event EventHandler? OnTrackChanged;
+
         [Key(0)]
-        public string Name { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string name = string.Empty;
 
         [Key(1)]
-        public string FilePath { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string filePath = string.Empty;
 
         [Key(2)]
-        public long StartPoint { get; set; }
+        [ObservableProperty]
+        private long startPoint;
 
         [Key(3)]
-        public long LoopPoint { get; set; }
+        [ObservableProperty]
+        private long loopPoint;
 
         [Key(4)]
-        public long TrackLength { get; set; }
+        [ObservableProperty]
+        private long trackLength;
 
         [Key(5)]
-        public long TransitionLength { get; set; }
+        [ObservableProperty]
+        private long transitionLength;
 
         [Key(6)]
-        public int TrackVolume { get; set; }
+        [ObservableProperty]
+        private int trackVolume;
 
         [Key(7)]
-        public SerializableColor TrackColor { get; set; } = new SerializableColor();
+        [ObservableProperty]
+        private SerializableColor trackColor = new SerializableColor();
 
         public void SetColor(Color color)
         {
@@ -38,6 +49,59 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
                 Green = color.G,
                 Blue = color.B,
             };
+        }
+
+        public void MarkDirty()
+        {
+            OnTrackChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        partial void OnFilePathChanging(string? oldValue, string newValue)
+        {
+            if (oldValue is null || oldValue.Equals(newValue)) return;
+            MarkDirty();
+        }
+
+        partial void OnNameChanging(string? oldValue, string newValue)
+        {
+            if (oldValue is null || oldValue.Equals(newValue)) return;
+            MarkDirty();
+        }
+
+        partial void OnStartPointChanging(long oldValue, long newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnLoopPointChanging(long oldValue, long newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnTrackLengthChanging(long oldValue, long newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnTransitionLengthChanging(long oldValue, long newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnTrackVolumeChanging(int oldValue, int newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnTrackColorChanging(SerializableColor? oldValue, SerializableColor newValue)
+        {
+            if (oldValue is null || oldValue.Equals(newValue)) return;
+            MarkDirty();
         }
     }
 

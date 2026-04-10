@@ -1,10 +1,12 @@
-﻿using NAudio.Wave;
+﻿using Microsoft.Extensions.Logging;
+using NAudio.Wave;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using static System.Windows.Forms.AxHost;
 
@@ -15,26 +17,6 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
     /// </summary>
     public partial class TrackPlayer : UserControl
     {
-        public static readonly DependencyProperty LoopStartProperty =
-            DependencyProperty.Register(nameof(LoopStart), typeof(long), 
-                typeof(TrackPlayer), new PropertyMetadata(default(long), OnPropertyChanged));
-
-        public long LoopStart
-        {
-            get => (long)GetValue(LoopStartProperty);
-            set => SetValue(LoopStartProperty, value);
-        }
-
-        public static readonly DependencyProperty LoopEndProperty =
-            DependencyProperty.Register(nameof(LoopEnd), typeof(long),
-                typeof(TrackPlayer), new PropertyMetadata(default(long), OnPropertyChanged));
-
-        public long LoopEnd
-        {
-            get => (long)GetValue(LoopEndProperty);
-            set => SetValue(LoopEndProperty, value);
-        }
-
         public static readonly DependencyProperty WaveformColorProperty =
             DependencyProperty.Register(nameof(WaveformColor), typeof(Color),
                 typeof(TrackPlayer), new PropertyMetadata(new Color(), OnPropertyChanged));
@@ -54,13 +36,6 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             get => (Track?)GetValue(TrackProperty);
             set => SetValue(TrackProperty, value);
         }
-
-        private int channels = 1;
-        private float[] audioBuffer = [];
-        private float[] monoBuffer = [];
-        private int bucketCount;
-        private float[] peakMin = [];
-        private float[] peakMax = [];
 
         private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -96,6 +71,21 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
             return [.. allFrames];
         }
+
+        // Private properties.
+        private int channels = 1;
+        private float[] audioBuffer = [];
+        private int bucketCount;
+        private float[] peakMin = [];
+        private float[] peakMax = [];
+        private int width = 0;
+        private int height = 0;
+        private Point mousePos;
+        private bool isDraggingStart;
+        private bool isDraggingEnd;
+        private float startCoordinate;
+        private float endCoordinate;
+        private int handleSize = 10;
 
         public TrackPlayer()
         {
@@ -154,12 +144,18 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         private void OnPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
-            int height = e.Info.Height;
-            int width = e.Info.Width;
 
+            // Only perform rebucket if necessary.
+            if (e.Info.Height != height || e.Info.Width != width 
+                || peakMin.Length == 0 || peakMax.Length == 0)
+            {
+                height = e.Info.Height;
+                width = e.Info.Width;
+                Rebucket(width);
+            }
             canvas.Clear();
-            if (Track is null) return;
-            Rebucket(width);
+
+            if (Track is null || width == 0 || height == 0 || peakMin.Length == 0) return;
 
             SKColor brushColor = WpfToSkiasharpColor(WaveformColor);
             SKPaint skBrushSolid = new SKPaint()
@@ -172,21 +168,32 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             };
             SKPaint skBrushTranslucent = new SKPaint()
             {
-                Color = brushColor,
+                Color = new SKColor(brushColor.Red, brushColor.Green, brushColor.Blue, 25),
                 Style = SKPaintStyle.Stroke,
                 StrokeCap = SKStrokeCap.Square,
                 StrokeWidth = 1,
                 IsAntialias = false,
-                BlendMode = SKBlendMode.Overlay
             };
 
-            float startX = (float)(LoopStart / Track.TrackLength * width);
-            float endX = (float)(LoopEnd / Track.TrackLength * width);
+            float startX = (float)((double)Track.StartPoint / Track.TrackLength * width);
+            float endX = (float)((double)Track.LoopPoint / Track.TrackLength * width) - 1;
+
+            if (isDraggingStart)
+            {
+                startX = MathF.Max(0, Math.Min((float)mousePos.X, endX - handleSize - 1));
+                Track.StartPoint = (long)((double)startX / width * Track.TrackLength);
+            }
+            else if (isDraggingEnd)
+            {
+                endX = MathF.Min(width - 1, MathF.Max((float)mousePos.X, startX + handleSize + 1));
+                Track.LoopPoint = (long)((double)endX / width * Track.TrackLength);
+            }
+
             float midY = height / 2f;
 
+            // Draw Waveform
             int buckets = peakMin.Length;
             float barWidth = width / buckets;
-
             for (int b = 0; b < buckets; b++)
             {
                 float x = b * barWidth;
@@ -200,6 +207,74 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
                 canvas.DrawRect(SKRect.Create(x, top, barWidth - 0.5f, barH), inRegion ? skBrushSolid : skBrushTranslucent);
             }
+
+            SKPaint skMoverStyle = new SKPaint()
+            {
+                Color = SKColor.Parse("#FFFFFF").WithAlpha(75),
+                Style = SKPaintStyle.StrokeAndFill,
+                StrokeCap = SKStrokeCap.Square,
+                StrokeWidth = 1,
+                IsAntialias = false,
+            };
+
+            SKPaint skMoverHoverStyle = new SKPaint()
+            {
+                Color = SKColor.Parse("#FFFFFF"),
+                Style = SKPaintStyle.StrokeAndFill,
+                StrokeCap = SKStrokeCap.Square,
+                StrokeWidth = 1,
+                IsAntialias = false,
+            };
+
+            float maxEndOffset = endX == width ? endX : endX - 1;
+
+            startCoordinate = startX;
+            endCoordinate = maxEndOffset;
+
+            float rectStartPos = startX + 1;
+            float rectEndPos = maxEndOffset - handleSize - 1;
+
+            SKPaint startPaint = IsMouseWithinBounds(startX, 0, handleSize, handleSize) ? skMoverHoverStyle : skMoverStyle;
+            SKPaint endPaint = IsMouseWithinBounds(rectEndPos, 0, handleSize, handleSize) ? skMoverHoverStyle : skMoverStyle;
+
+            // Draw Loop Points
+            canvas.DrawLine(new SKPoint(startX, 0), new SKPoint(startX, height), startPaint);
+            canvas.DrawRect(SKRect.Create(rectStartPos, 0, handleSize, handleSize), startPaint);
+
+            canvas.DrawLine(new SKPoint(maxEndOffset, 0), new SKPoint(maxEndOffset, height), endPaint);
+            canvas.DrawRect(SKRect.Create(rectEndPos, 0, handleSize, handleSize), endPaint);
+        }
+
+        private bool IsMouseWithinBounds(float left, float top, float width, float height)
+        {
+            return mousePos.X >= left && mousePos.X <= left + width && mousePos.Y > top && mousePos.Y <= top + height;
+        }
+
+        private void CanvasView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (!isDraggingEnd && !isDraggingStart)
+            {
+                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)) isDraggingStart = true;
+                else if (IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) isDraggingEnd = true;
+
+                if (isDraggingStart || isDraggingEnd)
+                {
+                    Mouse.Capture((IInputElement)sender);
+                }
+            }
+        }
+
+        private void CanvasView_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isDraggingStart) isDraggingStart = false;
+            else if (isDraggingEnd) isDraggingEnd = false;
+            Mouse.Capture(null);
+        }
+
+        private void CanvasView_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            mousePos = e.GetPosition(CanvasView);
+            CanvasView.InvalidateVisual();
         }
     }
 }

@@ -87,7 +87,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void SaveSession()
         {
             Session? session = sessionTracker.ActiveSession;
-            if (session is not null && session.IsDirty)
+            if (session is not null)
             {
                 session.MarkClean();
                 Serializer.ToBinary(session, session.FullPath);

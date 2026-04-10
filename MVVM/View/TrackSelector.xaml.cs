@@ -1,4 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using SimpleSoundtrackManager.MVVM.ViewModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
 
 namespace SimpleSoundtrackManager.MVVM.View
 {

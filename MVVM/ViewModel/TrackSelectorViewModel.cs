@@ -39,6 +39,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
         partial void OnTrackChanged(Track? value)
         {
+            if (value == null) return;
             UpdateColors();
         }
 
@@ -62,6 +63,11 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         {
             if (Track is null) return;
             sessionTracker.RemoveTrackFromActiveSesion(Track);
+        }
+
+        [RelayCommand]
+        private void Browse()
+        {
         }
 
         [RelayCommand]

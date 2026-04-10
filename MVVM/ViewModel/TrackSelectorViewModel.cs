@@ -26,6 +26,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private LinearGradientBrush trackGradientBrush = new LinearGradientBrush();
 
+        [ObservableProperty]
+        private Color trackColor;
+
         private bool isSource;
 
         public TrackSelectorViewModel(SessionTracker sessionTracker, AudioPlayer audioPlayer)
@@ -42,6 +45,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void UpdateColors()
         {
             if (Track is null) return;
+            TrackColor = Track.TrackColor.Color;
             BrushColor = new SolidColorBrush(Track.TrackColor.Color);
             Color transparent = Color.FromArgb(0, Track.TrackColor.Color.R, Track.TrackColor.Color.G, Track.TrackColor.Color.B);
             Color subOpacity = Color.FromArgb(5, Track.TrackColor.Color.R, Track.TrackColor.Color.G, Track.TrackColor.Color.B);
@@ -68,6 +72,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             {
                 SKColor color = pickerWindow.SelectedColor;
                 Track.SetColor(Color.FromRgb(color.Red, color.Green, color.Blue));
+                TrackColor = Track.TrackColor.Color;
                 UpdateColors();
             }
         }

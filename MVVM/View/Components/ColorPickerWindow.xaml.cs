@@ -25,7 +25,6 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         {
             InitializeComponent();
             _initialColor = initialColor;
-            
         }
 
         private void ColorCanvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)

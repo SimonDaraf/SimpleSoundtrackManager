@@ -1,5 +1,4 @@
 ﻿using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
 {

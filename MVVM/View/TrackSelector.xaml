@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleSoundtrackManager.MVVM.View"
+             xmlns:components="clr-namespace:SimpleSoundtrackManager.MVVM.View.Components"
              mc:Ignorable="d" d:DesignWidth="800">
     <Border BorderBrush="{Binding BrushColor}" BorderThickness="0, 0, 0, 1" Margin="0, 0, 0, 5" Background="{Binding TrackGradientBrush}">
         <Grid>
@@ -47,6 +48,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
+
+                <components:TrackPlayer Track="{Binding Track}" WaveformColor="{Binding TrackColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <Button Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"

@@ -166,7 +166,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                     Track track = new Track
                     {
                         Name = openFileDialog.SafeFileName,
-                        FilePath = selectedPath,
+                        FilePath = openFileDialog.FileName,
                         LoopPoint = length,
                         TrackLength = length,
                     };

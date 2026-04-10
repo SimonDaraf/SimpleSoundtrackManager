@@ -234,8 +234,8 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             float rectStartPos = startX + 1;
             float rectEndPos = maxEndOffset - handleSize - 1;
 
-            SKPaint startPaint = IsMouseWithinBounds(startX, 0, handleSize, handleSize) ? skMoverHoverStyle : skMoverStyle;
-            SKPaint endPaint = IsMouseWithinBounds(rectEndPos, 0, handleSize, handleSize) ? skMoverHoverStyle : skMoverStyle;
+            SKPaint startPaint = IsMouseWithinBounds(startX, 0, handleSize, handleSize) || isDraggingStart ? skMoverHoverStyle : skMoverStyle;
+            SKPaint endPaint = IsMouseWithinBounds(rectEndPos, 0, handleSize, handleSize) || isDraggingEnd ? skMoverHoverStyle : skMoverStyle;
 
             // Draw Loop Points
             canvas.DrawLine(new SKPoint(startX, 0), new SKPoint(startX, height), startPaint);

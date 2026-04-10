@@ -8,6 +8,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public long StartPosition { get; set; } = 0;
         public long LoopPosition { get; set; }
+        private bool isFirstRead = false;
 
         public LoopStream(WaveStream stream)
         {
@@ -36,20 +37,32 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             // https://markheath.net/post/looped-playback-in-net-with-naudio
             int totalBytesRead = 0;
 
+            if (!isFirstRead)
+            {
+                sourceStream.Position = StartPosition;
+                isFirstRead = true;
+            }
+                
+
             while (totalBytesRead < count)
             {
-                int bytesRead = sourceStream.Read(buffer, offset, count);
-                if (bytesRead == 0 || sourceStream.Position > sourceStream.Length)
+                int bytesToRead = (int)Math.Min(count - totalBytesRead, LoopPosition - sourceStream.Position);
+                if (bytesToRead <= 0)
                 {
-                    // Faulty source stream.
-                    if (sourceStream.Position == 0)
-                    {
+                    sourceStream.Position = StartPosition;
+                    bytesToRead = (int)Math.Min(count - totalBytesRead, LoopPosition - sourceStream.Position);
+                    if (bytesToRead <= 0)
                         break;
-                    }
-
-                    sourceStream.Position = 0;
                 }
+
+                int bytesRead = sourceStream.Read(buffer, offset + totalBytesRead, bytesToRead);
+                if (bytesRead == 0)
+                    break;
+
                 totalBytesRead += bytesRead;
+
+                if (sourceStream.Position >= LoopPosition)
+                    sourceStream.Position = StartPosition;
             }
 
             return totalBytesRead;

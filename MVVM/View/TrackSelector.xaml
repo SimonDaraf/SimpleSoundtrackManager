@@ -32,7 +32,6 @@
                                  Style="{StaticResource TextBoxStyle}" Width="400"/>
                         <Button Grid.Column="1" Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"
                                 Command="{Binding OpenColorPickerCommand}" Margin="5, 10" Content="Color" Padding="5,0"/>
-                        <TextBlock/>
                     </StackPanel>
                 </Grid>
                 
@@ -58,6 +57,13 @@
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <Button Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"
                             Command="{Binding TogglePlaybackCommand}" Margin="10, 10" Content="{Binding PlaybackState}" Padding="10,0"/>
+                    <TextBlock Text="Start Point: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.StartMsPoint}" Width="Auto"
+                             IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
+
+                    <TextBlock Margin="10, 0, 0, 0" Text="Loop Point: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.LoopMsPoint}" Width="Auto"
+                             IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
                 </StackPanel>
             </Grid>
         </Grid>

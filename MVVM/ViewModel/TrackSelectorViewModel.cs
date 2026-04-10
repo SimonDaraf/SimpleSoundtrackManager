@@ -35,11 +35,22 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         {
             this.sessionTracker = sessionTracker;
             this.audioPlayer = audioPlayer;
+            this.audioPlayer.OnTrackChanged += AudioPlayer_OnTrackChanged;
+        }
+
+        private void AudioPlayer_OnTrackChanged(object? sender, Track e)
+        {
+            if (Track is not null && !e.Equals(Track))
+            {
+                PlaybackState = "Play";
+                isSource = false;
+            }
         }
 
         partial void OnTrackChanged(Track? value)
         {
             if (value == null) return;
+            value.ForceUpdateMsView();
             UpdateColors();
         }
 
@@ -95,11 +106,14 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     audioPlayer.Play(Track);
                     PlaybackState = "Stop";
                     isSource = true;
+                    return;
                 }
+
                 audioPlayer.Stop();
                 PlaybackState = "Play";
                 isSource = false;
-            } else
+            } 
+            else
             {
                 audioPlayer.Play(Track);
                 PlaybackState = "Stop";

@@ -8,6 +8,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
     public partial class Track : ObservableObject
     {
         public event EventHandler? OnTrackChanged;
+        public event EventHandler<long>? OnTrackPlayPositionUpdated;
 
         [Key(0)]
         [ObservableProperty]
@@ -41,6 +42,43 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [ObservableProperty]
         private SerializableColor trackColor = new SerializableColor();
 
+        [Key(8)]
+        [ObservableProperty]
+        private long lengthInMs;
+
+        [IgnoreMember]
+        [ObservableProperty]
+        private string startMsPoint = string.Empty;
+
+        [IgnoreMember]
+        [ObservableProperty]
+        private string loopMsPoint = string.Empty;
+
+        [IgnoreMember]
+        [ObservableProperty]
+        private long playPosition;
+
+        public void ForceUpdateMsView()
+        {
+            long msStart = BytePosToMs(StartPoint);
+            StartMsPoint = FormatTime(msStart);
+            long msLoop = BytePosToMs(LoopPoint);
+            LoopMsPoint = FormatTime(msLoop);
+        }
+
+        private long BytePosToMs(long pos)
+        {
+            return (long)(pos / (double)TrackLength * LengthInMs);
+        }
+
+        private string FormatTime(long ms)
+        {
+            long minutes = ms / 60000;
+            long seconds = (ms % 60000) / 1000;
+            long milliseconds = ms % 1000;
+            return $"{minutes:D2}:{seconds:D2}:{milliseconds:D3}";
+        }
+
         public void SetColor(Color color)
         {
             TrackColor = new SerializableColor
@@ -72,12 +110,18 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         {
             if (oldValue == newValue) return;
             MarkDirty();
+
+            long ms = BytePosToMs(newValue);
+            StartMsPoint = FormatTime(ms);
         }
 
         partial void OnLoopPointChanging(long oldValue, long newValue)
         {
             if (oldValue == newValue) return;
             MarkDirty();
+
+            long ms = BytePosToMs(newValue);
+            LoopMsPoint = FormatTime(ms);
         }
 
         partial void OnTrackLengthChanging(long oldValue, long newValue)
@@ -102,6 +146,17 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         {
             if (oldValue is null || oldValue.Equals(newValue)) return;
             MarkDirty();
+        }
+
+        partial void OnLengthInMsChanging(long oldValue, long newValue)
+        {
+            if (oldValue == newValue) return;
+            MarkDirty();
+        }
+
+        partial void OnPlayPositionChanged(long value)
+        {
+            OnTrackPlayPositionUpdated?.Invoke(this, value);
         }
     }
 

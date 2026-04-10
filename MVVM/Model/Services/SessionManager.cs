@@ -158,7 +158,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 string audioDirectory = Path.Combine(session.DirectoryPath, "AudioFiles");
                 string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
 
-                long length = GetTrackLengthFromfile(openFileDialog.FileName);
+                (long length, long ms) = GetTrackLengthFromfile(openFileDialog.FileName);
 
                 // If audio file is already in correct directory. No need to copy it.
                 if (audioDirectory == selectedPath)
@@ -169,6 +169,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                         FilePath = openFileDialog.FileName,
                         LoopPoint = length,
                         TrackLength = length,
+                        LengthInMs = ms,
                     };
                     return track;
                 }
@@ -204,6 +205,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                         FilePath = destPath,
                         LoopPoint = length,
                         TrackLength = length,
+                        LengthInMs = ms,
                     };
                     return track;
                 }
@@ -218,10 +220,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
-        private long GetTrackLengthFromfile(string filePath)
+        private (long, long) GetTrackLengthFromfile(string filePath)
         {
             using AudioFileReader audio = new AudioFileReader(filePath);
-            return audio.Length;
+            return (audio.Length, (long)audio.TotalTime.TotalMilliseconds);
         }
     }
 }

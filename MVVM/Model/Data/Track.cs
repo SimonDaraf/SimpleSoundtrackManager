@@ -58,6 +58,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
 
         [IgnoreMember]
         [ObservableProperty]
+        private string transitionLengthTime = string.Empty;
+
+        [IgnoreMember]
+        [ObservableProperty]
         private long playPosition;
 
         public void ForceUpdateMsView()
@@ -66,6 +70,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
             StartMsPoint = FormatTime(msStart);
             long msLoop = BytePosToMs(LoopPoint);
             LoopMsPoint = FormatTime(msLoop);
+            TransitionLengthTime = FormatTime(BytePosToMs(TransitionLength));
         }
 
         private long BytePosToMs(long pos)
@@ -141,6 +146,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         {
             if (oldValue == newValue) return;
             MarkDirty();
+            TransitionLengthTime = FormatTime(BytePosToMs(newValue));
         }
 
         partial void OnTrackVolumeChanging(float oldValue, float newValue)
@@ -165,6 +171,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         partial void OnPlayPositionChanged(long value)
         {
             OnTrackPlayPositionUpdated?.Invoke(this, value);
+        }
+
+        partial void OnFilePathChanged(string value)
+        {
+            OnTrackChanged?.Invoke(this, EventArgs.Empty);
+            MarkDirty();
         }
     }
 

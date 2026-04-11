@@ -11,6 +11,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
     public partial class TrackSelectorViewModel : ObservableObject
     {
+        private readonly SessionManager sessionManager;
         private readonly SessionTracker sessionTracker;
         private readonly AudioPlayer audioPlayer;
 
@@ -32,9 +33,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private bool isSource = false;
 
-        public TrackSelectorViewModel(SessionTracker sessionTracker, AudioPlayer audioPlayer)
+        public TrackSelectorViewModel(SessionManager sessionManager, SessionTracker sessionTracker, AudioPlayer audioPlayer)
         {
             this.sessionTracker = sessionTracker;
+            this.sessionManager = sessionManager;
             this.audioPlayer = audioPlayer;
             this.audioPlayer.OnTrackChanged += AudioPlayer_OnTrackChanged;
         }
@@ -89,6 +91,8 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [RelayCommand]
         private void Browse()
         {
+            if (Track is null) return;
+            sessionManager.ReplaceAudioFileInTrack(Track);
         }
 
         [RelayCommand]

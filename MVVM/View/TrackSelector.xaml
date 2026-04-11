@@ -65,6 +65,10 @@
                     <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.LoopMsPoint}" Width="Auto"
                              IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
 
+                    <TextBlock Margin="10, 0, 0, 0" Text="Transition Length: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.TransitionLengthTime}" Width="Auto"
+                            IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
+
                     <TextBlock Margin="10, 0, 0, 0" Text="Volume: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
                     <Slider Minimum="0" Maximum="1" Value="{Binding Track.TrackVolume}" 
                             Width="150" Style="{StaticResource VolumeSliderStyle}" Margin="10"

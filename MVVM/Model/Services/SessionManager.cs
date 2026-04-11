@@ -43,6 +43,89 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
+        private bool IsSessionCorrupt(Session session, out Track[] corrupt)
+        {
+            List<Track> c = new List<Track>();
+            foreach (Track t in session.Tracks)
+            {
+                if (!File.Exists(t.FilePath))
+                {
+                    c.Add(t);
+                }
+            } 
+
+            corrupt = [..c];
+            return corrupt.Length > 0;
+        }
+
+        private bool TryRecoverLostAudioFile(Track track)
+        {
+            string audioDirectory = Path.GetDirectoryName(track.FilePath) ?? throw new Exception("Invalid path state");
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = $"Recover {track.Name}";
+            openFileDialog.Multiselect = false;
+            openFileDialog.Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav";
+            openFileDialog.InitialDirectory = audioDirectory;
+
+            bool? result = openFileDialog.ShowDialog();
+
+            if (result == true)
+            {
+                File.Delete(track.FilePath);
+
+                string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
+                string finalPath = openFileDialog.FileName;
+
+                if (audioDirectory != selectedPath)
+                {
+                    finalPath = Path.Combine(audioDirectory, openFileDialog.SafeFileName);
+                    File.Move(openFileDialog.FileName, finalPath);
+                }
+
+                (long length, long ms) = GetTrackLengthFromfile(finalPath);
+                track.TrackLength = length;
+                track.LengthInMs = ms;
+                track.FilePath = finalPath;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Validate that a session is not corrup.
+        /// If it is, attempt recovery.
+        /// </summary>
+        public void ValidateSession(Session session)
+        {
+            if (IsSessionCorrupt(session, out Track[] corrupt))
+            {
+                MessageBoxResult res = MessageBox.Show($"Found {corrupt.Length} missing audio files in session, do you wish to try to recover these? If not they will be removved from the session",
+                    "Error", MessageBoxButton.YesNo, MessageBoxImage.Error);
+
+                if (res == MessageBoxResult.Yes)
+                {
+                    foreach (Track t in corrupt)
+                    {
+                        if (!TryRecoverLostAudioFile(t))
+                        {
+                            session.Tracks.Remove(t);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (Track t in corrupt)
+                    {
+                        session.Tracks.Remove(t);
+                    }
+                }
+
+                // Finally save.
+                Serializer.ToBinary(session, session.FullPath);
+            }
+        }
+
         /// <summary>
         /// Returns the standard directory.
         /// </summary>
@@ -100,7 +183,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
 
             string finalPath = Path.Combine(path, $"{name}.ssm");
-
             Session session = new Session
             {
                 Name = name,
@@ -141,6 +223,36 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 logger.LogWarning("Failed to load session file.");
                 MessageBox.Show("Failed to load session.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
+            }
+        }
+
+        public void ReplaceAudioFileInTrack(Track track)
+        {
+            string audioDirectory = Path.GetDirectoryName(track.FilePath) ?? throw new Exception("Invalid path state");
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = false;
+            openFileDialog.Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav";
+            openFileDialog.InitialDirectory = audioDirectory;
+
+            bool? result = openFileDialog.ShowDialog();
+
+            if (result == true) {
+                File.Delete(track.FilePath);
+
+                string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
+
+                string finalPath = openFileDialog.FileName;
+
+                if (audioDirectory != selectedPath)
+                {
+                    finalPath = Path.Combine(audioDirectory, openFileDialog.SafeFileName);
+                    File.Move(openFileDialog.FileName, finalPath);
+                }
+
+                (long length, long ms) = GetTrackLengthFromfile(finalPath);
+                track.TrackLength = length;
+                track.LengthInMs = ms;
+                track.FilePath = finalPath;
             }
         }
 

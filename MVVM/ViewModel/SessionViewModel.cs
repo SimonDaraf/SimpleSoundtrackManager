@@ -68,6 +68,8 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         public override void OnNavigation()
         {
             if (Session is null) return;
+            
+            sessionManager.ValidateSession(Session);
 
             foreach (Track track in Session.Tracks)
             {

@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
 {
@@ -6,6 +7,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
     {
         private WaveStream sourceStream;
 
+        public long TransitionLength { get; set; }
         public long StartPosition { get; set; } = 0;
         public long LoopPosition { get; set; }
         private bool isFirstRead = false;
@@ -51,13 +53,21 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 {
                     sourceStream.Position = StartPosition;
                     bytesToRead = (int)Math.Min(count - totalBytesRead, LoopPosition - sourceStream.Position);
-                    if (bytesToRead <= 0)
-                        break;
                 }
 
                 int bytesRead = sourceStream.Read(buffer, offset + totalBytesRead, bytesToRead);
                 if (bytesRead == 0)
-                    break;
+                {
+                    if (bytesToRead > 0)
+                    {
+                        sourceStream.Position = StartPosition;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                    
 
                 totalBytesRead += bytesRead;
 

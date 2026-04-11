@@ -9,6 +9,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
     {
         public event EventHandler? OnTrackChanged;
         public event EventHandler<long>? OnTrackPlayPositionUpdated;
+        public event EventHandler<long>? OnTrackPlayPositionUpdateRequested;
+        public event EventHandler<float>? OnTrackVolumeUpdated;
 
         [Key(0)]
         [ObservableProperty]
@@ -36,7 +38,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
 
         [Key(6)]
         [ObservableProperty]
-        private int trackVolume;
+        private float trackVolume;
 
         [Key(7)]
         [ObservableProperty]
@@ -94,6 +96,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
             OnTrackChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        public void RequestPlayPositionChange(long pos)
+        {
+            OnTrackPlayPositionUpdateRequested?.Invoke(this, pos);
+        }
+
         partial void OnFilePathChanging(string? oldValue, string newValue)
         {
             if (oldValue is null || oldValue.Equals(newValue)) return;
@@ -136,10 +143,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
             MarkDirty();
         }
 
-        partial void OnTrackVolumeChanging(int oldValue, int newValue)
+        partial void OnTrackVolumeChanging(float oldValue, float newValue)
         {
             if (oldValue == newValue) return;
             MarkDirty();
+            OnTrackVolumeUpdated?.Invoke(this, newValue);
         }
 
         partial void OnTrackColorChanging(SerializableColor? oldValue, SerializableColor newValue)

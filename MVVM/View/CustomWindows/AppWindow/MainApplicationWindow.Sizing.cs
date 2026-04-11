@@ -4,6 +4,8 @@ namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
 {
     public partial class MainApplicationWindow : ApplicationWindow
     {
+        public event EventHandler<WindowState>? OnWindowStateChange;
+
         /// <summary>
         /// <c>Method</c> Toggles window state based on current window state.
         /// </summary>
@@ -62,6 +64,8 @@ namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
                 ButtonRestore!.Visibility = Visibility.Collapsed;
                 ButtonMaximize!.Visibility = Visibility.Visible;
             }
+
+            OnWindowStateChange?.Invoke(this, WindowState);
         }
     }
 }

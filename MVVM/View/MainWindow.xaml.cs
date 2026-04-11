@@ -1,4 +1,5 @@
-﻿using SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow;
+﻿using SimpleSoundtrackManager.MVVM.Model.Services;
+using SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow;
 
 namespace SimpleSoundtrackManager.MVVM.View
 {
@@ -10,6 +11,18 @@ namespace SimpleSoundtrackManager.MVVM.View
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            StaticKeyManager.DeRegisterActiveWindow();
+            base.OnDeactivated(e);
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            StaticKeyManager.RegisterWindowComponent(this);
+            base.OnActivated(e);
         }
     }
 }

@@ -29,7 +29,8 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private Color trackColor;
 
-        private bool isSource;
+        [ObservableProperty]
+        private bool isSource = false;
 
         public TrackSelectorViewModel(SessionTracker sessionTracker, AudioPlayer audioPlayer)
         {
@@ -43,7 +44,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             if (Track is not null && !e.Equals(Track))
             {
                 PlaybackState = "Play";
-                isSource = false;
+                IsSource = false;
             }
         }
 
@@ -51,6 +52,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         {
             if (value == null) return;
             value.ForceUpdateMsView();
+            value.OnTrackVolumeUpdated += Value_OnTrackVolumeUpdated;
             UpdateColors();
         }
 
@@ -67,6 +69,14 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     new GradientStop(subOpacity, 1)
                 ],
                 new Point(0, 0), new Point(0, 1));
+        }
+
+        private void Value_OnTrackVolumeUpdated(object? sender, float e)
+        {
+            if (IsSource)
+            {
+                audioPlayer.UpdateVolume(e);
+            }
         }
 
         [RelayCommand]
@@ -100,24 +110,24 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             if (Track is null) return;
             if (audioPlayer.IsPlaying)
             {
-                if (!isSource)
+                if (!IsSource)
                 {
                     audioPlayer.Stop();
                     audioPlayer.Play(Track);
                     PlaybackState = "Stop";
-                    isSource = true;
+                    IsSource = true;
                     return;
                 }
 
                 audioPlayer.Stop();
                 PlaybackState = "Play";
-                isSource = false;
+                IsSource = false;
             } 
             else
             {
                 audioPlayer.Play(Track);
                 PlaybackState = "Stop";
-                isSource = true;
+                IsSource = true;
             }
         }
     }

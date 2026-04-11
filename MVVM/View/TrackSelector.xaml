@@ -52,18 +52,23 @@
                     <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
 
-                <components:TrackPlayer Track="{Binding Track}" WaveformColor="{Binding TrackColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <components:TrackPlayer Track="{Binding Track}" WaveformColor="{Binding TrackColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsPlaying="{Binding IsSource}"/>
 
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <Button Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"
                             Command="{Binding TogglePlaybackCommand}" Margin="10, 10" Content="{Binding PlaybackState}" Padding="10,0"/>
-                    <TextBlock Text="Start Point: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="Start: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.StartMsPoint}" Width="Auto"
                              IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
 
-                    <TextBlock Margin="10, 0, 0, 0" Text="Loop Point: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Margin="10, 0, 0, 0" Text="Loop: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox Style="{StaticResource TextBoxStyle}" Margin="5, 10" Text="{Binding Track.LoopMsPoint}" Width="Auto"
                              IsReadOnly="True" Foreground="{StaticResource Foreground}"/>
+
+                    <TextBlock Margin="10, 0, 0, 0" Text="Volume: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding Track.TrackVolume}" 
+                            Width="150" Style="{StaticResource VolumeSliderStyle}" Margin="10"
+                            SmallChange="0.01" LargeChange="0.1" TickFrequency="0.01" TickPlacement="None"/>
                 </StackPanel>
             </Grid>
         </Grid>

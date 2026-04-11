@@ -170,6 +170,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                         LoopPoint = length,
                         TrackLength = length,
                         LengthInMs = ms,
+                        TrackVolume = 0.5f,
                     };
                     return track;
                 }
@@ -206,6 +207,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                         LoopPoint = length,
                         TrackLength = length,
                         LengthInMs = ms,
+                        TrackVolume = 0.5f,
                     };
                     return track;
                 }

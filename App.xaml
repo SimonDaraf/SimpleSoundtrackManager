@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="/MVVM/View/Styles/Window/ApplicationWindowStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/ButtonStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/TextBoxStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Components/SliderStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type viewModel:SessionSelectorViewModel}">

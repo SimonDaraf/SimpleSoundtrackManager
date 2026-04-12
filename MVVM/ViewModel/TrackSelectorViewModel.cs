@@ -54,7 +54,6 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         {
             if (value == null) return;
             value.ForceUpdateMsView();
-            value.OnTrackVolumeUpdated += Value_OnTrackVolumeUpdated;
             UpdateColors();
         }
 
@@ -71,14 +70,6 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     new GradientStop(subOpacity, 1)
                 ],
                 new Point(0, 0), new Point(0, 1));
-        }
-
-        private void Value_OnTrackVolumeUpdated(object? sender, float e)
-        {
-            if (IsSource)
-            {
-                audioPlayer.UpdateVolume(e);
-            }
         }
 
         [RelayCommand]

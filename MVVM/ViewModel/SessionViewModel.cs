@@ -13,6 +13,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private readonly NavigationService navigationService;
         private readonly SessionTracker sessionTracker;
         private readonly Func<TrackSelectorViewModel> selectorFactory;
+        private readonly AudioPlayer audioPlayer;
 
         [ObservableProperty]
         private Session? session;
@@ -21,13 +22,14 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private ObservableCollection<TrackSelectorViewModel> tracks;
 
         public SessionViewModel(SessionManager sessionManager, NavigationService navigationService, SessionTracker sessionTracker,
-            Func<TrackSelectorViewModel> selectorFactory)
+            Func<TrackSelectorViewModel> selectorFactory, AudioPlayer audioPlayer)
         {
             this.sessionManager = sessionManager;
             this.navigationService = navigationService;
             this.sessionTracker = sessionTracker;
             this.selectorFactory = selectorFactory;
             tracks = new ObservableCollection<TrackSelectorViewModel>();
+            this.audioPlayer = audioPlayer;
 
             sessionTracker.OnTrackAdded += SessionTracker_OnTrackAdded;
             sessionTracker.OnTrackRemoved += SessionTracker_OnTrackRemoved;
@@ -63,6 +65,14 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             {
                 sessionTracker.AddTrack(track);
             }
+        }
+
+        [RelayCommand]
+        private void StartSession()
+        {
+            if (Session == null) return;
+            audioPlayer.Stop();
+            navigationService.RequestSessionStart(Session);
         }
 
         public override void OnNavigation()

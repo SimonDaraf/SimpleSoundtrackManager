@@ -1,6 +1,8 @@
-﻿using NAudio.Wave;
+﻿using Microsoft.VisualBasic.Devices;
+using NAudio.Wave;
 using SimpleSoundtrackManager.MVVM.Model.Audio;
 using SimpleSoundtrackManager.MVVM.Model.Data;
+using System.Diagnostics;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
@@ -9,22 +11,15 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         public event EventHandler<Track>? OnTrackChanged;
 
         private WaveOutEvent? outputDevice;
-        private TrackSignalParent? source;
+        private LoopableCachedAudio? source;
 
         public bool IsPlaying { get; private set; }
         public Track? ActiveTrack { get; private set; }
 
         private void CreateSignalChain(Track track)
         {
-            LoopStream loopStream = new LoopStream(new AudioFileReader(track.FilePath))
-            {
-                StartPosition = track.StartPoint,
-                LoopPosition = track.LoopPoint,
-                TransitionLength = track.TransitionLength,
-            };
-
-            source = new TrackSignalParent(loopStream);
-            source.Volume = track.TrackVolume;
+            CachedAudio cached = new CachedAudio(track.FilePath);
+            source = new LoopableCachedAudio(track, cached);
         }
 
         public void Play(Track track)
@@ -37,7 +32,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             outputDevice ??= new WaveOutEvent();
 
             CreateSignalChain(track);
-            source!.PositionUpdated += Source_PositionUpdated;
+            source!.OnPositionUpdated += Source_PositionUpdated;
 
             outputDevice.Init(source);
             outputDevice.Play();
@@ -48,13 +43,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         private void ActiveTrack_OnTrackPlayPositionUpdateRequested(object? sender, long e)
         {
-            source.ForcePositionChange(e);
+            if (source is null) return;
+            source.Position = e;
         }
 
-        private void Source_PositionUpdated(object? sender, long e)
+        private void Source_PositionUpdated(object? sender, TrackPositionUpdatedEventArgs e)
         {
             if (ActiveTrack is null) return;
-            ActiveTrack.PlayPosition = e;
+            ActiveTrack.PlayPosition = e.Position;
         }
 
         public void Stop()
@@ -62,18 +58,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             outputDevice?.Stop();
             outputDevice?.Dispose();
             outputDevice = null;
-            if (source is not null) source.PositionUpdated -= Source_PositionUpdated;
+            if (source is not null) source.OnPositionUpdated -= Source_PositionUpdated;
             source?.Dispose();
             source = null;
             IsPlaying = false;
             ActiveTrack.OnTrackPlayPositionUpdateRequested -= ActiveTrack_OnTrackPlayPositionUpdateRequested;
             ActiveTrack = null;
-        }
-
-        public void UpdateVolume(float volume)
-        {
-            if (source is null) return;
-            source.Volume = volume;
         }
     }
 }

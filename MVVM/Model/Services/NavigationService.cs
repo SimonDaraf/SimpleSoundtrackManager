@@ -33,6 +33,19 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             return createNewWindowFactory();
         }
 
+        public void RequestSessionStart(Session session)
+        {
+            stack.Clear();
+
+            if (tryNavigate(NavigationViews.ActiveSession) is ActiveSessionViewModel vm)
+            {
+                stack.Push(vm);
+                vm.Session = session;
+                vm.OnNavigation();
+                OnNavigationRequested?.Invoke(this, vm);
+            }
+        }
+
         public void RequestNavigationToSession(Session session)
         {
             // A session is the root of all navigation, clear the stack.
@@ -58,5 +71,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
     public enum NavigationViews
     {
         SessionView,
+        ActiveSession,
     }
 }

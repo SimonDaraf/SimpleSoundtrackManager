@@ -28,6 +28,14 @@
             <DataTemplate DataType="{x:Type viewModel:SessionViewModel}">
                 <view:SessionView/>
             </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:ActiveSessionViewModel}">
+                <view:ActiveSessionView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:TrackSessionViewModel}">
+                <view:TrackSessionView/>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

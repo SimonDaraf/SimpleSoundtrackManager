@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using SimpleSoundtrackManager.MVVM.Model.Utils;
+using System.Media;
 using System.Windows;
+using System.Windows.Input;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
@@ -19,6 +22,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private string title = "SSM";
 
+        private bool ctrlHeldDown = false;
+        private bool sHeldDown;
+
         public MainWindowViewModel(NavigationService navigationService, SessionManager sessionManager, SessionTracker sessionTracker)
         {
             this.navigationService = navigationService;
@@ -28,6 +34,26 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
             sessionTracker.OnBeforeSessionChanged += SessionTracker_OnBeforeSessionChanged;
             sessionTracker.OnSessionOpened += SessionTracker_OnSessionOpened;
+
+            StaticKeyManager.OnKeyDown += StaticKeyManager_OnKeyDown;
+            StaticKeyManager.OnKeyUp += StaticKeyManager_OnKeyUp;
+        }
+
+        private void StaticKeyManager_OnKeyUp(object? sender, System.Windows.Input.Key e)
+        {
+            if (e == Key.LeftCtrl) ctrlHeldDown = false;
+            if (e == Key.S) sHeldDown = false;
+        }
+
+        private void StaticKeyManager_OnKeyDown(object? sender, System.Windows.Input.Key e)
+        {
+            if (e == Key.LeftCtrl) ctrlHeldDown = true;
+            if (e == Key.S) sHeldDown = true;
+
+            if (ctrlHeldDown && sHeldDown)
+            {
+                SaveSession();
+            }
         }
 
         private void SessionTracker_OnBeforeSessionChanged(object? sender, Session e)
@@ -97,7 +123,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [RelayCommand]
         private void SaveSessionAs()
         {
-            
+
         }
 
         [RelayCommand]

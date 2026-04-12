@@ -57,6 +57,7 @@ namespace SimpleSoundtrackManager
             services.AddTransient<OpenSessionViewModel>();
             services.AddTransient<CreateNewSessionViewModel>();
             services.AddTransient<SessionSelectorViewModel>();
+            services.AddKeyedTransient<NavigatableViewModel, ActiveSessionViewModel>(NavigationViews.ActiveSession);
             services.AddKeyedTransient<NavigatableViewModel, SessionViewModel>(NavigationViews.SessionView);
 
             // Declaration of all services.

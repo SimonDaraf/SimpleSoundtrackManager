@@ -10,7 +10,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         public event EventHandler? OnTrackChanged;
         public event EventHandler<long>? OnTrackPlayPositionUpdated;
         public event EventHandler<long>? OnTrackPlayPositionUpdateRequested;
-        public event EventHandler<float>? OnTrackVolumeUpdated;
 
         [Key(0)]
         [ObservableProperty]
@@ -153,7 +152,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         {
             if (oldValue == newValue) return;
             MarkDirty();
-            OnTrackVolumeUpdated?.Invoke(this, newValue);
         }
 
         partial void OnTrackColorChanging(SerializableColor? oldValue, SerializableColor newValue)

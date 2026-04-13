@@ -22,8 +22,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
     /// </summary>
     public class LoopableCachedAudio : ISampleProvider, IDisposable
     {
-        private readonly object _lock = new object();
-
         public event EventHandler<TrackPositionUpdatedEventArgs>? OnPositionUpdated;
         private bool isFading;
         private FadeRegion lastFadeRegion = FadeRegion.None;
@@ -50,122 +48,109 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             get => audio.Position;
             set 
             {
-                lock (_lock)
-                {
-                    // We need to align the position incase position is not alignable.
-                    int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
-                    int frameSize = bytesPerSample * audio.WaveFormat.Channels;
-                    long alignedValue = (value / frameSize) * frameSize;
-                    audio.Position = alignedValue;
-                    isFading = false;
-                    lastFadeRegion = FadeRegion.None;
-                    copy.Position = StartPosition;
-                }
+                audio.Position = value;
             }
         }
 
         public int Read(float[] buffer, int offset, int count)
         {
-            lock (_lock)
+            HandleFadeInState(audio.Position);
+            int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
+            if (isFading && !IsInStartFadeRegion(audio.Position))
             {
-                HandleFadeInState();
-                int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
-                if (isFading && !IsInStartFadeRegion())
+                float[] copyBuffer = new float[count];
+                FillSampleDuringFade(copyBuffer, count);
+                int samplesRead = audio.Read(buffer, offset, count);
+
+                long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
+                for (int i = 0; i < samplesRead; i++)
                 {
-                    float[] copyBuffer = new float[count];
-                    FillSampleDuringFade(copyBuffer, count);
-
-                    int samplesRead = audio.Read(buffer, offset, count);
-
-                    long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
-                    for (int i = 0; i < samplesRead; i++)
+                    // If we have read past the loop point. We can just continue to read from the copy, next
+                    // read phase will read from the copy anyways so we might as well continue to do so.
+                    long samplePosition = byteStartPosition + (i * bytesPerSample);
+                    if (samplePosition >= LoopPosition)
                     {
-                        float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
-                        buffer[i + offset] = ((buffer[i + offset] * fadeVolume) + copyBuffer[i]) * Volume;
-                    }
-
-                    float maxSample = 0f;
-                    for (int i = 0; i < samplesRead; i++)
-                        maxSample = MathF.Max(maxSample, MathF.Abs(buffer[i + offset]));
-
-                    DispatchPositionUpdatedEvent();
-                    return samplesRead;
-                }
-                else
-                {
-                    int samplesRead = audio.Read(buffer, offset, count);
-                    long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
-                    for (int i = 0; i < samplesRead; i++)
-                    {
-                        float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
-                        buffer[i + offset] *= Volume * fadeVolume;
-                    }
-
-                    float maxSample = 0f;
-                    for (int i = 0; i < samplesRead; i++)
-                        maxSample = MathF.Max(maxSample, MathF.Abs(buffer[i + offset]));
-
-                    DispatchPositionUpdatedEvent();
-                    return samplesRead;
-                }
-            }
-        }
-
-        private void HandleFadeInState()
-        {
-            if (isFading)
-            {
-                if (!IsInFadeRegions())
-                {
-                    if (lastFadeRegion == FadeRegion.End)
-                    {
-                        audio.Position = copy!.Position;
-                        isFading = false;
+                        buffer[i + offset] = copyBuffer[i] * Volume;
                     }
                     else
                     {
-                        isFading = false;
+                        float fadeVolume = GetFadeVolumeFactor(samplePosition);
+                        buffer[i + offset] = ((buffer[i + offset] * fadeVolume) + (copyBuffer[i] * (1f - fadeVolume))) * Volume;
                     }
-                    return;
                 }
+
+                DispatchPositionUpdatedEvent();
+                return samplesRead;
             }
             else
             {
-                if (IsInFadeRegions())
+                int samplesRead = audio.Read(buffer, offset, count);
+                long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
+                for (int i = 0; i < samplesRead; i++)
                 {
-                    isFading = true;
-                    lastFadeRegion = IsInStartFadeRegion() ? FadeRegion.Start : FadeRegion.End;
-                    copy.Position = StartPosition;
+                    float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
+                    buffer[i + offset] *= Volume * fadeVolume;
                 }
+
+                DispatchPositionUpdatedEvent();
+                return samplesRead;
             }
         }
 
-        private bool IsInStartFadeRegion()
+        private void HandleFadeInState(long position)
         {
-            return audio.Position >= StartPosition && audio.Position <= StartPosition + TransitionLength;
+            if (IsInEndFadeRegion(position))
+            {
+                if (!isFading || lastFadeRegion != FadeRegion.End)
+                {
+                    long posOffset = position - (LoopPosition - TransitionLength);
+                    copy.Position = StartPosition + posOffset;
+                }
+                isFading = true;
+                lastFadeRegion = FadeRegion.End;
+            }
+            else if (IsInStartFadeRegion(position))
+            {
+                if (!isFading || lastFadeRegion != FadeRegion.Start)
+                {
+                    copy.Position = StartPosition;
+                }
+                isFading = true;
+                lastFadeRegion = FadeRegion.Start;
+            }
+            else
+            {
+                if (isFading && lastFadeRegion == FadeRegion.End)
+                {
+                    (audio, copy) = (copy, audio);
+                }
+                isFading = false;
+                lastFadeRegion = FadeRegion.None;
+            }
         }
 
-        private bool IsInEndFadeRegion()
+        private bool IsInStartFadeRegion(long position)
         {
-            return audio.Position >= LoopPosition - TransitionLength && audio.Position <= LoopPosition;
+            return position <= StartPosition + TransitionLength && position >= StartPosition;
         }
 
-        private bool IsInFadeRegions()
+        private bool IsInEndFadeRegion(long position)
         {
-            return IsInStartFadeRegion() ||
-                IsInEndFadeRegion();
+            return position >= LoopPosition - TransitionLength && position <= LoopPosition; ;
         }
 
         private float GetFadeVolumeFactor(long position)
         {
+            if (TransitionLength == 0) return 1f;
+
             // Start region.
-            if (position >= StartPosition && position <= StartPosition + TransitionLength)
+            if (IsInStartFadeRegion(position))
             {
                 float t = (float) (position - StartPosition) / TransitionLength;
                 return MathF.Max(0, MathF.Min(1, t));
             }
             // End region.
-            else if (position >= LoopPosition - TransitionLength && position <= LoopPosition)
+            else if (IsInEndFadeRegion(position))
             {
                 float t = (float) (LoopPosition - position) / TransitionLength;
                 return MathF.Max(0, MathF.Min(1, t));
@@ -177,15 +162,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         private void FillSampleDuringFade(float[] buffer, int count)
         {
-            int read = copy.Read(buffer, 0, count);
-            // Convert to byte position.
-            int bytesPerSample = copy.WaveFormat.BitsPerSample / 8;
-            long byteStartPosition = copy.Position - (read * bytesPerSample);
-            for (int i = 0; i < read; i++)
-            {
-                float transitionVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
-                buffer[i] *= transitionVolume;
-            }
+            copy.Read(buffer, 0, count);
         }
 
         private void DispatchPositionUpdatedEvent()

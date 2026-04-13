@@ -1,5 +1,5 @@
-﻿using NAudio.Wave;
-using System.Diagnostics;
+﻿using Microsoft.VisualBasic.Devices;
+using NAudio.Wave;
 using System.IO;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
@@ -16,8 +16,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public long Position
         {
-            get { lock (_lock) return stream.Position; }
-            set { lock (_lock) stream.Position = value; }
+            get => stream.Position;
+            set
+            {
+                int bytesPerSample = WaveFormat.BitsPerSample / 8;
+                int frameSize = bytesPerSample * WaveFormat.Channels;
+                stream.Position = (value / frameSize) * frameSize;
+            }
         }
 
         public CachedAudio(string filePath)
@@ -60,26 +65,19 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public int Read(float[] buffer, int offset, int count)
         {
-            lock (_lock)
+            int bytesPerSample = WaveFormat.BitsPerSample / 8;
+            byte[] bytesRead = new byte[count * bytesPerSample];
+
+            long positionBefore = stream.Position;
+            int read = stream.Read(bytesRead, offset, count * bytesPerSample);
+            int samplesRead = read / bytesPerSample;
+
+            for (int i = 0; i < samplesRead; i++)
             {
-                int bytesPerSample = WaveFormat.BitsPerSample / 8;
-                byte[] bytesRead = new byte[count * bytesPerSample];
-
-                long positionBefore = stream.Position;
-                int read = stream.Read(bytesRead, offset, count * bytesPerSample);
-                int samplesRead = read / bytesPerSample;
-
-                for (int i = 0; i < samplesRead; i++)
-                {
-                    buffer[i + offset] = BitConverter.ToSingle(bytesRead, i * bytesPerSample);
-                }
-
-                float maxSample = 0f;
-                for (int i = 0; i < samplesRead; i++)
-                    maxSample = MathF.Max(maxSample, MathF.Abs(buffer[i + offset]));
-
-                return samplesRead;
+                buffer[i + offset] = BitConverter.ToSingle(bytesRead, i * bytesPerSample);
             }
+
+            return samplesRead;
         }
     }
 }

@@ -62,7 +62,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             source?.Dispose();
             source = null;
             IsPlaying = false;
-            ActiveTrack.OnTrackPlayPositionUpdateRequested -= ActiveTrack_OnTrackPlayPositionUpdateRequested;
+            if (ActiveTrack is not null)
+            {
+                ActiveTrack.OnTrackPlayPositionUpdateRequested -= ActiveTrack_OnTrackPlayPositionUpdateRequested;
+            }
             ActiveTrack = null;
         }
     }

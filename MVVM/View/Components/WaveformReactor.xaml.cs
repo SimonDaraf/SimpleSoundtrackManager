@@ -15,7 +15,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
     {
         public static readonly DependencyProperty IsPlayingProperty =
             DependencyProperty.Register(nameof(IsPlaying), typeof(bool),
-                typeof(TrackPlayer), new PropertyMetadata(false));
+                typeof(WaveformReactor), new PropertyMetadata(false));
 
         public bool IsPlaying
         {
@@ -25,33 +25,12 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
         public static readonly DependencyProperty WaveformColorProperty =
             DependencyProperty.Register(nameof(WaveformColor), typeof(Color),
-                typeof(TrackPlayer), new PropertyMetadata(new Color()));
+                typeof(WaveformReactor), new PropertyMetadata(new Color()));
 
         public Color WaveformColor
         {
             get => (Color)GetValue(WaveformColorProperty);
             set => SetValue(WaveformColorProperty, value);
-        }
-
-        public static readonly DependencyProperty BarCountProperty =
-            DependencyProperty.Register(nameof(BarCount), typeof(int),
-                typeof(TrackPlayer), new PropertyMetadata(48, OnBarCountChanged));
-
-        public int BarCount
-        {
-            get => (int)GetValue(BarCountProperty);
-            set => SetValue(BarCountProperty, value);
-        }
-
-        private static void OnBarCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is WaveformReactor wr && e.NewValue is int v)
-            {
-                lock (wr._lock)
-                {
-                    wr.barHeights = new float[v];
-                }
-            }
         }
 
         private object _lock = new object();
@@ -61,15 +40,18 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         public WaveformReactor()
         {
             InitializeComponent();
+
             WeakReferenceMessenger.Default.Register<float[]>(this, (o, m) =>
             {
-                if (!IsPlaying)
-                    return;
-                lock(_lock)
+                float[] copy = [.. m];
+                
+                Dispatcher.InvokeAsync(() =>
                 {
-                    m.CopyTo(buffer, 0);
-                    Dispatcher.InvokeAsync(() => CanvasView.InvalidateVisual());
-                }
+                    if (!IsPlaying)
+                        return;
+                    buffer = copy;
+                    CanvasView.InvalidateVisual();
+                });
             });
         }
 
@@ -80,21 +62,26 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
         private void CanvasView_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
         {
+            SKCanvas canvas = e.Surface.Canvas;
+            canvas.Clear();
+
+            // If not playing, do not repaint.
+            if (!IsPlaying)
+                return;
             lock (_lock)
             {
-                SKCanvas canvas = e.Surface.Canvas;
-                canvas.Clear();
-
-                // If not playing, do not repaint.
-                if (!IsPlaying)
-                    return;
-
+                int width = e.Info.Width;
                 float[] fft = FastFourierTransform(buffer);
 
-                int binsPerBar = fft.Length / 2 / BarCount;
-                float[] targetHeights = new float[BarCount];
+                if (barHeights.Length != width)
+                {
+                    barHeights = new float[width];
+                }
 
-                for (int i = 0; i < BarCount; i++)
+                int binsPerBar = fft.Length / 2 / width;
+                float[] targetHeights = new float[width];
+
+                for (int i = 0; i < width; i++)
                 {
                     float sum = 0;
                     for (int j = 0; j < binsPerBar; j++)
@@ -105,16 +92,23 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                     targetHeights[i] = sum / binsPerBar;
                 }
 
-                for (int i = 0; i < BarCount; i++)
+                float maxSample = 0;
+                for (int i = 0; i < width; i++)
                 {
-                    barHeights[i] = (barHeights[i] * 0.7f) + (targetHeights[i] * 0.3f);
+                    float val = (barHeights[i] * 0.8f) + (targetHeights[i] * 0.2f);
+                    barHeights[i] = val;
+                    if (val > maxSample)
+                        maxSample = val;
                 }
 
                 // Draw
                 float canvasWidth = e.Info.Width;
                 float canvasHeight = e.Info.Height;
-                float barWidth = canvasWidth / BarCount;
-                float gap = barWidth * 0.2f;
+
+                int desiredBarWidth = 1;
+                int gap = 3;
+                float barStep = desiredBarWidth + gap;
+                int effectiveBars = (int)(canvasWidth / barStep);
 
                 SKPaint skBrushSolid = new SKPaint()
                 {
@@ -125,13 +119,13 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                     IsAntialias = false,
                 };
 
-                for (int i = 0; i < BarCount; i++)
+                for (int i = 0; i < effectiveBars; i++)
                 {
-                    float barHeight = Math.Clamp(barHeights[i] * canvasHeight * 3f, 2f, canvasHeight);
-                    float x = (i * barWidth) + gap / 2;
-                    float y = (canvasHeight - barHeight) / 2; // centered vertically
+                    float barHeight = e.Info.Height * (barHeights[i] / maxSample);
+                    float x = i * barStep;
+                    float y = (canvasHeight - barHeight) / 2f;
 
-                    canvas.DrawRoundRect(x, y, barWidth - gap, barHeight, 4, 4, skBrushSolid);
+                    canvas.DrawRect(SKRect.Create(x, y, desiredBarWidth, barHeight), skBrushSolid);
                 }
             }
         }

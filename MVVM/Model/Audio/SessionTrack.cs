@@ -11,7 +11,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public WaveFormat WaveFormat => audio.WaveFormat;
 
-        public float Volume { get; set; }
+        public float Volume { get; set; } = 1f;
 
         public SessionTrack(LoopableCachedAudio audio)
         {

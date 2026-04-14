@@ -25,7 +25,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
-            <components:WaveformReactor/>
+            <components:WaveformReactor IsPlaying="{Binding IsActive}" WaveformColor="{Binding Track.TrackColor.BrushColor.Color}"/>
             <TextBlock Grid.Row="1" Margin="10, 0" Text="{Binding Track.Name}" Foreground="{StaticResource Foreground}"/>
         </Grid>
     </Border>

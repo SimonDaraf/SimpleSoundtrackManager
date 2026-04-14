@@ -68,6 +68,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void EndSession()
         {
             if (Session is null) return;
+            if (mixer is not null)
+            {
+                mixer.Stop();
+            }
             navigationService.RequestNavigationToSession(Session);
         }
     }

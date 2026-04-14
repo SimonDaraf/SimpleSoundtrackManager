@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using System.Windows;
 using System.Windows.Media;
@@ -7,11 +8,16 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
     public partial class TrackSessionViewModel : ObservableObject
     {
+        public event EventHandler<Track>? OnTrackChangeRequested;
+
         [ObservableProperty]
         private Track? track;
 
         [ObservableProperty]
         private LinearGradientBrush trackGradientBrush = new LinearGradientBrush();
+
+        [ObservableProperty]
+        private bool isActive = false;
 
         partial void OnTrackChanged(Track? value)
         {
@@ -32,6 +38,13 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     new GradientStop(subOpacity, 1)
                 ],
                 new Point(0, 0), new Point(0, 1));
+        }
+
+        [RelayCommand]
+        private void Click()
+        {
+            if (Track is null) return;
+            OnTrackChangeRequested?.Invoke(this, Track);
         }
     }
 }

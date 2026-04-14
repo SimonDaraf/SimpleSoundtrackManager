@@ -5,15 +5,27 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleSoundtrackManager.MVVM.View"
              xmlns:vm="clr-namespace:SimpleSoundtrackManager.MVVM.ViewModel"
+             xmlns:components="clr-namespace:SimpleSoundtrackManager.MVVM.View.Components"
+             x:Name="ParentControl"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=vm:TrackSessionViewModel}">
-    <Border Background="{Binding TrackGradientBrush}" BorderBrush="{Binding Track.TrackColor.BrushColor}" BorderThickness="0, 0, 0, 1" Margin="10"
+    <Border x:Name="BorderTrack" Background="{Binding TrackGradientBrush}" BorderBrush="{Binding Track.TrackColor.BrushColor}" BorderThickness="0, 0, 0, 1" Margin="10"
         Height="200">
+        <Border.Opacity>
+            <MultiBinding Converter="{StaticResource OpacityConverter}">
+                <Binding Path="IsMouseOver" ElementName="BorderTrack"/>
+                <Binding Path="IsActive"/>
+            </MultiBinding>
+        </Border.Opacity>
+        <Border.InputBindings>
+            <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
+        </Border.InputBindings>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
+            <components:WaveformReactor/>
             <TextBlock Grid.Row="1" Margin="10, 0" Text="{Binding Track.Name}" Foreground="{StaticResource Foreground}"/>
         </Grid>
     </Border>

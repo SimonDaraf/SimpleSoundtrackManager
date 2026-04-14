@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SimpleSoundtrackManager"
              xmlns:viewModel="clr-namespace:SimpleSoundtrackManager.MVVM.ViewModel"
+             xmlns:converter="clr-namespace:SimpleSoundtrackManager.MVVM.Model.Converters"
              xmlns:view="clr-namespace:SimpleSoundtrackManager.MVVM.View">
     <Application.Resources>
         <ResourceDictionary>
@@ -16,6 +17,8 @@
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/TextBoxStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/SliderStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <converter:BooleanToVisibilityConverter x:Key="OpacityConverter"/>
 
             <DataTemplate DataType="{x:Type viewModel:SessionSelectorViewModel}">
                 <view:SessionSelectorView/>

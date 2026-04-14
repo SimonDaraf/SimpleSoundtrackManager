@@ -54,29 +54,18 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public int Read(float[] buffer, int offset, int count)
         {
-            HandleFadeInState(audio.Position);
-            int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
-            if (isFading && !IsInStartFadeRegion(audio.Position))
+            if (TransitionLength == 0)
             {
-                float[] copyBuffer = new float[count];
-                FillSampleDuringFade(copyBuffer, count);
+                // If no transition, just check whenever we are passed loop and read from the beginning.
                 int samplesRead = audio.Read(buffer, offset, count);
-
-                long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
                 for (int i = 0; i < samplesRead; i++)
                 {
-                    // If we have read past the loop point. We can just continue to read from the copy, next
-                    // read phase will read from the copy anyways so we might as well continue to do so.
-                    long samplePosition = byteStartPosition + (i * bytesPerSample);
-                    if (samplePosition >= LoopPosition)
-                    {
-                        buffer[i + offset] = copyBuffer[i] * Volume;
-                    }
-                    else
-                    {
-                        float fadeVolume = GetFadeVolumeFactor(samplePosition);
-                        buffer[i + offset] = ((buffer[i + offset] * fadeVolume) + (copyBuffer[i] * (1f - fadeVolume))) * Volume;
-                    }
+                    buffer[i + offset] *= Volume;
+                }
+
+                if (Position >= LoopPosition)
+                {
+                    Position = StartPosition;
                 }
 
                 DispatchPositionUpdatedEvent();
@@ -84,16 +73,47 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             }
             else
             {
-                int samplesRead = audio.Read(buffer, offset, count);
-                long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
-                for (int i = 0; i < samplesRead; i++)
+                int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
+                HandleFadeInState(audio.Position);
+                if (isFading && !IsInStartFadeRegion(audio.Position))
                 {
-                    float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
-                    buffer[i + offset] *= Volume * fadeVolume;
-                }
+                    float[] copyBuffer = new float[count];
+                    FillSampleDuringFade(copyBuffer, count);
+                    int samplesRead = audio.Read(buffer, offset, count);
 
-                DispatchPositionUpdatedEvent();
-                return samplesRead;
+                    long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
+                    for (int i = 0; i < samplesRead; i++)
+                    {
+                        // If we have read past the loop point. We can just continue to read from the copy, next
+                        // read phase will read from the copy anyways so we might as well continue to do so.
+                        long samplePosition = byteStartPosition + (i * bytesPerSample);
+                        if (samplePosition >= LoopPosition)
+                        {
+                            buffer[i + offset] = copyBuffer[i] * Volume;
+                        }
+                        else
+                        {
+                            float fadeVolume = GetFadeVolumeFactor(samplePosition);
+                            buffer[i + offset] = ((buffer[i + offset] * fadeVolume) + (copyBuffer[i] * (1f - fadeVolume))) * Volume;
+                        }
+                    }
+
+                    DispatchPositionUpdatedEvent();
+                    return samplesRead;
+                }
+                else
+                {
+                    int samplesRead = audio.Read(buffer, offset, count);
+                    long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
+                    for (int i = 0; i < samplesRead; i++)
+                    {
+                        float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
+                        buffer[i + offset] *= Volume * fadeVolume;
+                    }
+
+                    DispatchPositionUpdatedEvent();
+                    return samplesRead;
+                }
             }
         }
 

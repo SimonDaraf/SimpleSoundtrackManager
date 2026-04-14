@@ -4,7 +4,6 @@ using SimpleSoundtrackManager.MVVM.Model;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using System.Collections.ObjectModel;
-using System.Printing;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
@@ -41,7 +40,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 TrackViews.Add(vm);
             }
 
-            mixer = new SessionMixer(Session.Tracks);
+            Task.Run(() =>
+            {
+                mixer = new SessionMixer(Session.Tracks);
+            });
         }
 
         private void OnTrackChangeRequested(object? sender, Track e)

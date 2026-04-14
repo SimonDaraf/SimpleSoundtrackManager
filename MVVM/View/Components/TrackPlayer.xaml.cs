@@ -49,14 +49,17 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         {
             if (d is TrackPlayer tp)
             {
-                if (e.Property.Equals(TrackProperty) && e.NewValue is Track t)
+                Task.Run(() =>
                 {
-                    tp.audioBuffer = ReadAllSamplesNormalized(t.FilePath, out int channels);
-                    tp.channels = channels;
-                    t.OnTrackPlayPositionUpdated += tp.OnTrackPlayPositionUpdated;
-                }
+                    if (e.Property.Equals(TrackProperty) && e.NewValue is Track t)
+                    {
+                        tp.audioBuffer = ReadAllSamplesNormalized(t.FilePath, out int channels);
+                        tp.channels = channels;
+                        t.OnTrackPlayPositionUpdated += tp.OnTrackPlayPositionUpdated;
+                    }
 
-                tp.CanvasView.InvalidateVisual();
+                    tp.Dispatcher.InvokeAsync(() => tp.CanvasView.InvalidateVisual());
+                });
             }
         }
 

@@ -37,6 +37,7 @@
                 </Grid.ColumnDefinitions>
                 <Button Style="{StaticResource ButtonStyle}" Content="End Session" Padding="10, 0" Height="25"
                     Command="{Binding EndSessionCommand}"/>
+                <TextBlock Grid.Column="2" Text="{Binding Status}" Foreground="{StaticResource Foreground}" VerticalAlignment="Center" Margin="10, 0"/>
             </Grid>
         </Border>
     </Grid>

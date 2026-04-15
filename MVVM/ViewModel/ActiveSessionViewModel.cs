@@ -20,6 +20,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private ObservableCollection<TrackSessionViewModel> trackViews = [];
 
+        [ObservableProperty]
+        private string status = $"Loading...";
+
         public ActiveSessionViewModel(NavigationService navigationService)
         {
             this.navigationService = navigationService;
@@ -42,7 +45,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
             Task.Run(() =>
             {
+                Status = "Caching Audio Data...";
                 mixer = new SessionMixer(Session.Tracks);
+                Status = "Ready";
             });
         }
 
@@ -63,6 +68,8 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     mixer.Init(vm.Track);
                 else
                     mixer.RequestChange(vm.Track);
+
+                Status = $"Playing: {vm.Track.Name}";
             }
         }
 

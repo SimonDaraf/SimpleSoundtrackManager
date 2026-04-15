@@ -66,26 +66,12 @@
                                                       Height="20"
                                                       VerticalAlignment="Top"
                                                       Command="{Binding Path=SaveSessionCommand}"/>
-                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                                                      Header="Save As..."
-                                                      Height="20"
-                                                      VerticalAlignment="Top"
-                                                      Command="{Binding Path=SaveSessionAsCommand}"/>
                                             <Separator Style="{StaticResource MenuSeparatorStyle}"/>
                                             <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
                                                       Header="Exit"
                                                       Height="20"
                                                       VerticalAlignment="Top"
                                                       Command="{Binding Path=ExitCommand}"/>
-                                        </MenuItem>
-                                        <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
-                                                  Header="Edit"
-                                                  Height="20"
-                                                  VerticalAlignment="Top">
-                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
-                                                      Header="Preferences"
-                                                      Height="20"
-                                                      VerticalAlignment="Top"/>
                                         </MenuItem>
                                     </Menu>
                                 </StackPanel>

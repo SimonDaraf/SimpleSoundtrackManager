@@ -119,12 +119,6 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         }
 
         [RelayCommand]
-        private void SaveSessionAs()
-        {
-
-        }
-
-        [RelayCommand]
         private void Exit()
         {
             MessageBoxResult res = TrySaveChanges();

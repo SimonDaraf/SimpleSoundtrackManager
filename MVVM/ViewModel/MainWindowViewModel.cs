@@ -86,7 +86,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void OpenSession()
         {
             MessageBoxResult result = TrySaveChanges();
-            if (result == MessageBoxResult.Cancel || result == MessageBoxResult.None) return;
+            if (result == MessageBoxResult.Cancel) return;
 
             Session? session = sessionManager.BrowseSession();
 
@@ -100,7 +100,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void NewSession()
         {
             MessageBoxResult result = TrySaveChanges();
-            if (result == MessageBoxResult.Cancel || result == MessageBoxResult.None) return;
+            if (result == MessageBoxResult.Cancel) return;
 
             Window w = navigationService.GetCreateNewWindow();
             w.Owner = App.Current.MainWindow;

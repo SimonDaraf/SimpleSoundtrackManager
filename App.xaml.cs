@@ -53,7 +53,6 @@ namespace SimpleSoundtrackManager
 
             // Declaration of all view models.
             services.AddSingleton<MainWindowViewModel>();
-            services.AddTransient<TrackSelectorViewModel>();
             services.AddTransient<OpenSessionViewModel>();
             services.AddTransient<CreateNewSessionViewModel>();
             services.AddTransient<SessionSelectorViewModel>();
@@ -67,16 +66,29 @@ namespace SimpleSoundtrackManager
             services.AddSingleton<AudioPlayer>();
 
             // Other misc declarations.
-            services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => track => {
-                TrackSelectorViewModel vm = provider.GetRequiredService<TrackSelectorViewModel>();
-                vm.Track = track;
-                return vm;
-            });
-
             services.AddTransient<Func<NavigationViews, NavigatableViewModel>>(provider => key => provider.GetRequiredKeyedService<NavigatableViewModel>(key));
             services.AddTransient<Func<CreateNewSessionWindow>>(provider => () => provider.GetRequiredService<CreateNewSessionWindow>());
             services.AddTransient<Func<SessionSelectorViewModel>>(provider => () => provider.GetRequiredService<SessionSelectorViewModel>());
-            services.AddTransient<Func<TrackSelectorViewModel>>(provider => () => provider.GetRequiredService<TrackSelectorViewModel>());
+
+            // Avoid having the container track these instances.
+            services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => {
+                AudioPlayer audioPlayer = provider.GetRequiredService<AudioPlayer>();
+                SessionManager sessionManager = provider.GetRequiredService<SessionManager>();
+                SessionTracker sessionTracker = provider.GetRequiredService<SessionTracker>();
+                return track =>
+                {
+                    var vm = new TrackSelectorViewModel(sessionManager, sessionTracker, audioPlayer);
+                    vm.Track = track;
+                    return vm;
+                };
+            });
+            services.AddTransient<Func<TrackSelectorViewModel>>(provider =>
+            {
+                AudioPlayer audioPlayer = provider.GetRequiredService<AudioPlayer>();
+                SessionManager sessionManager = provider.GetRequiredService<SessionManager>();
+                SessionTracker sessionTracker = provider.GetRequiredService<SessionTracker>();
+                return () => new TrackSelectorViewModel(sessionManager, sessionTracker, audioPlayer);
+            });
 
             // Build provider.
             serviceProvider = services.BuildServiceProvider();

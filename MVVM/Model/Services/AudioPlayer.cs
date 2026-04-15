@@ -27,6 +27,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             outputDevice?.Dispose();
             source?.Dispose();
 
+            if (ActiveTrack is not null)
+                ActiveTrack.OnTrackPlayPositionUpdateRequested -= ActiveTrack_OnTrackPlayPositionUpdateRequested;
+
             ActiveTrack = track;
             ActiveTrack.OnTrackPlayPositionUpdateRequested += ActiveTrack_OnTrackPlayPositionUpdateRequested;
             outputDevice ??= new WaveOutEvent();

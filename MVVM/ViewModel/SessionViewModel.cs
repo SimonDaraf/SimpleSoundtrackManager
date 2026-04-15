@@ -42,6 +42,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 if (vm.Track is not null && vm.Track.Equals(e))
                 {
                     Tracks.Remove(vm);
+                    vm.Dispose();
                     return;
                 }
             }
@@ -77,16 +78,30 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
         public override void OnNavigation()
         {
-            if (Session is null) return;
-            
-            sessionManager.ValidateSession(Session);
+            foreach (TrackSelectorViewModel vm in Tracks)
+                vm.Dispose();
+            Tracks.Clear();
 
+            if (Session is null) return;
+            sessionManager.ValidateSession(Session);
             foreach (Track track in Session.Tracks)
             {
                 TrackSelectorViewModel vm = selectorFactory();
                 vm.Track = track;
                 Tracks.Add(vm);
             }
+        }
+
+        public override void Cleanup()
+        {
+            sessionTracker.OnTrackRemoved -= SessionTracker_OnTrackRemoved;
+            sessionTracker.OnTrackAdded -= SessionTracker_OnTrackAdded;
+
+            foreach (TrackSelectorViewModel vm in Tracks)
+            {
+                vm.Dispose();
+            }
+            GC.Collect();
         }
     }
 }

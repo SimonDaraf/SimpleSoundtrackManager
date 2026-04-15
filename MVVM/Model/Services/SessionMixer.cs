@@ -5,7 +5,7 @@ using SimpleSoundtrackManager.MVVM.Model.Data;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
-    public class SessionMixer
+    public class SessionMixer : IDisposable
     {
         private Dictionary<Track, LoopableCachedAudio> tracks;
         private WaveOutEvent? waveOut;
@@ -62,6 +62,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         private void SessionTrack_OnBufferProcessed(object? sender, float[] e)
         {
             WeakReferenceMessenger.Default.Send(e);
+        }
+
+        public void Dispose()
+        {
+            foreach (LoopableCachedAudio cachedAudio in tracks.Values)
+            {
+                cachedAudio.Dispose();
+            }
         }
     }
 }

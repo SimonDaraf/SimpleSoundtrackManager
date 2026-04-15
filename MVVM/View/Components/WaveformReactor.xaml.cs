@@ -53,6 +53,14 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                     CanvasView.InvalidateVisual();
                 });
             });
+
+            Unloaded += WaveformReactor_Unloaded;
+        }
+
+        private void WaveformReactor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            WeakReferenceMessenger.Default.Unregister<float[]>(this);
+            Unloaded -= WaveformReactor_Unloaded;
         }
 
         private SKColor WpfToSkiasharpColor(Color color)
@@ -110,7 +118,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                 float barStep = desiredBarWidth + gap;
                 int effectiveBars = (int)(canvasWidth / barStep);
 
-                SKPaint skBrushSolid = new SKPaint()
+                using SKPaint skBrushSolid = new SKPaint()
                 {
                     Color = WpfToSkiasharpColor(WaveformColor),
                     Style = SKPaintStyle.StrokeAndFill,

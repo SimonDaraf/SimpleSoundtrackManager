@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
-    public partial class TrackSelectorViewModel : ObservableObject
+    public partial class TrackSelectorViewModel : ObservableObject, IDisposable
     {
         private readonly SessionManager sessionManager;
         private readonly SessionTracker sessionTracker;
@@ -124,6 +124,11 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 PlaybackState = "Stop";
                 IsSource = true;
             }
+        }
+
+        public void Dispose()
+        {
+            audioPlayer.OnTrackChanged -= AudioPlayer_OnTrackChanged;
         }
     }
 }

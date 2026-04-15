@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using SimpleSoundtrackManager.MVVM.Model.Data;
-using System.Diagnostics;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
 {

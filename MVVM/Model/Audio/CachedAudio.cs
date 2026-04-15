@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic.Devices;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System.IO;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio

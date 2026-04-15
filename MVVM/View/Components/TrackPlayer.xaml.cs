@@ -51,11 +51,19 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             {
                 Task.Run(() =>
                 {
-                    if (e.Property.Equals(TrackProperty) && e.NewValue is Track t)
+                    if (e.Property.Equals(TrackProperty))
                     {
-                        tp.audioBuffer = ReadAllSamplesNormalized(t.FilePath, out int channels);
-                        tp.channels = channels;
-                        t.OnTrackPlayPositionUpdated += tp.OnTrackPlayPositionUpdated;
+                        if (e.OldValue is Track tOld)
+                        {
+                            tOld.OnTrackPlayPositionUpdated -= tp.OnTrackPlayPositionUpdated;
+                        }
+
+                        if (e.NewValue is Track tNew)
+                        {
+                            tp.audioBuffer = ReadAllSamplesNormalized(tNew.FilePath, out int channels);
+                            tp.channels = channels;
+                            tNew.OnTrackPlayPositionUpdated += tp.OnTrackPlayPositionUpdated;
+                        }
                     }
 
                     tp.Dispatcher.InvokeAsync(() => tp.CanvasView.InvalidateVisual());
@@ -105,19 +113,155 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         public TrackPlayer()
         {
             InitializeComponent();
-            CanvasView.SizeChanged += (s, e) =>
-            {
-                width += 1; // Just introduce a small shift so the fucking canvas will reload.
-                CanvasView.InvalidateVisual();
-            };
+            CanvasView.SizeChanged += CanvasView_SizeChanged;
 
             StaticKeyManager.OnKeyDown += StaticKeyManager_OnKeyDown;
             StaticKeyManager.OnKeyUp += StaticKeyManager_OnKeyUp;
+
+            Unloaded += TrackPlayer_Unloaded;
+        }
+
+        private void TrackPlayer_Unloaded(object sender, RoutedEventArgs e)
+        {
+            CanvasView.SizeChanged -= CanvasView_SizeChanged;
+            StaticKeyManager.OnKeyDown -= StaticKeyManager_OnKeyDown;
+            StaticKeyManager.OnKeyUp -= StaticKeyManager_OnKeyUp;
+            if (Track is not null)
+            {
+                Track.OnTrackPlayPositionUpdated -= OnTrackPlayPositionUpdated;
+            }
+            Unloaded -= TrackPlayer_Unloaded;
+        }
+
+        private void CanvasView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            width += 1; // Just introduce a small shift so the fucking canvas will reload.
+            CanvasView.InvalidateVisual();
         }
 
         private SKColor WpfToSkiasharpColor(Color color)
         {
             return new SKColor(color.R, color.G, color.B);
+        }
+
+        private bool IsMouseWithinBounds(float left, float top, float width, float height)
+        {
+            return mousePos.X >= left && mousePos.X <= left + width && mousePos.Y > top && mousePos.Y <= top + height;
+        }
+
+        private void CanvasView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (IsPlaying)
+            {
+                // Slight offset to not fully equal the start and endpoint.
+                float startX = (float)((double)Track.StartPoint / Track.TrackLength * width) + 1;
+                float endX = (float)((double)Track.LoopPoint / Track.TrackLength * width) - 1;
+
+                if (mousePos.X > startX && mousePos.X < endX)
+                {
+                    long pos = (long)(mousePos.X * Track.TrackLength / width);
+                    Track.RequestPlayPositionChange(pos);
+                }
+            }
+            else if (ctrlHeldDown)
+            {
+                shouldMoveTransitionPoint = true;
+            }
+            else if (!isDraggingEnd && !isDraggingStart)
+            {
+                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)) isDraggingStart = true;
+                else if (IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) isDraggingEnd = true;
+
+                if (isDraggingStart || isDraggingEnd)
+                {
+                    Mouse.Capture((IInputElement)sender);
+                }
+            }
+        }
+
+        private void CanvasView_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (shouldMoveTransitionPoint) shouldMoveTransitionPoint = false;
+            if (isDraggingStart) isDraggingStart = false;
+            else if (isDraggingEnd) isDraggingEnd = false;
+            Mouse.Capture(null);
+        }
+
+        private void CanvasView_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            mousePos = e.GetPosition(CanvasView);
+
+            if (ctrlHeldDown &&
+                (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize) || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) ||
+                ctrlHeldDown && shouldMoveTransitionPoint)
+            {
+                Mouse.OverrideCursor = Cursors.SizeWE;
+            }
+            else
+            {
+                Mouse.OverrideCursor = null;
+            }
+
+            if (!IsPlaying)
+            {
+                if (shouldMoveTransitionPoint && Track is not null)
+                {
+                    if (!ctrlHeldDown)
+                    {
+                        shouldMoveTransitionPoint = false;
+                    }
+                    else
+                    {
+                        long clamp = (Track.LoopPoint - Track.StartPoint) / 2;
+                        long proposedLength = (long)(mousePos.X * Track.TrackLength / width) - Track.StartPoint;
+                        Track.TransitionLength = Math.Max(0, Math.Min(clamp, proposedLength));
+                    }
+                }
+                else if (Track is not null && (isDraggingStart || isDraggingEnd))
+                {
+                    long clamp = (Track.LoopPoint - Track.StartPoint) / 2;
+                    Track.TransitionLength = Math.Max(0, Math.Min(clamp, Track.TransitionLength));
+                }
+                CanvasView.InvalidateVisual();
+            }
+        }
+
+        private void OnTrackPlayPositionUpdated(object? sender, long e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (IsPlaying)
+                {
+                    playPosition = e;
+                    CanvasView.InvalidateVisual();
+                }
+            });
+        }
+
+        private void StaticKeyManager_OnKeyUp(object? sender, Key e)
+        {
+            if (ctrlHeldDown && e == Key.LeftCtrl)
+            {
+                ctrlHeldDown = false;
+                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)
+                    || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize))
+                {
+                    Mouse.OverrideCursor = null;
+                }
+            }
+        }
+
+        private void StaticKeyManager_OnKeyDown(object? sender, Key e)
+        {
+            if (!ctrlHeldDown && e == Key.LeftCtrl)
+            {
+                ctrlHeldDown = true;
+                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)
+                    || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize))
+                {
+                    Mouse.OverrideCursor = Cursors.SizeWE;
+                }
+            }
         }
 
         private void Rebucket(int buckets)
@@ -186,7 +330,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             if (Track is null || width == 0 || height == 0 || peakMin.Length == 0) return;
 
             SKColor brushColor = WpfToSkiasharpColor(WaveformColor);
-            SKPaint skBrushSolid = new SKPaint()
+            using SKPaint skBrushSolid = new SKPaint()
             {
                 Color = brushColor,
                 Style = SKPaintStyle.StrokeAndFill,
@@ -194,7 +338,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                 StrokeWidth = 1,
                 IsAntialias = false,
             };
-            SKPaint skBrushTranslucent = new SKPaint()
+            using SKPaint skBrushTranslucent = new SKPaint()
             {
                 Color = new SKColor(brushColor.Red, brushColor.Green, brushColor.Blue, 50),
                 Style = SKPaintStyle.StrokeAndFill,
@@ -202,7 +346,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                 StrokeWidth = 1,
                 IsAntialias = false,
             };
-            SKPaint skBrushTranslucentColorless = new SKPaint()
+            using SKPaint skBrushTranslucentColorless = new SKPaint()
             {
                 Color = new SKColor(255, 255, 255, 25),
                 Style = SKPaintStyle.StrokeAndFill,
@@ -299,11 +443,10 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                 {
                     paint = skBrushSolid;
                 }
-
                 canvas.DrawRect(SKRect.Create(x, top, barWidth, barH), paint);
             }
 
-            SKPaint skMoverStyle = new SKPaint()
+            using SKPaint skMoverStyle = new SKPaint()
             {
                 Color = SKColor.Parse("#FFFFFF").WithAlpha(75),
                 Style = SKPaintStyle.StrokeAndFill,
@@ -312,7 +455,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                 IsAntialias = false,
             };
 
-            SKPaint skMoverHoverStyle = new SKPaint()
+            using SKPaint skMoverHoverStyle = new SKPaint()
             {
                 Color = SKColor.Parse("#FFFFFF"),
                 Style = SKPaintStyle.StrokeAndFill,
@@ -329,8 +472,8 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             float rectStartPos = startX + 1;
             float rectEndPos = maxEndOffset - handleSize - 1;
 
-            SKPaint startPaint = IsMouseWithinBounds(startX, 0, handleSize, handleSize) || isDraggingStart ? skMoverHoverStyle : skMoverStyle;
-            SKPaint endPaint = IsMouseWithinBounds(rectEndPos, 0, handleSize, handleSize) || isDraggingEnd ? skMoverHoverStyle : skMoverStyle;
+            using SKPaint startPaint = IsMouseWithinBounds(startX, 0, handleSize, handleSize) || isDraggingStart ? skMoverHoverStyle : skMoverStyle;
+            using SKPaint endPaint = IsMouseWithinBounds(rectEndPos, 0, handleSize, handleSize) || isDraggingEnd ? skMoverHoverStyle : skMoverStyle;
 
             // Draw Loop Points
             canvas.DrawLine(new SKPoint(startX, 0), new SKPoint(startX, height), startPaint);
@@ -348,124 +491,6 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             return 3f * mt * mt * t * p1
                  + 3f * mt * t * t * p2
                  + t * t * t;
-        }
-
-        private bool IsMouseWithinBounds(float left, float top, float width, float height)
-        {
-            return mousePos.X >= left && mousePos.X <= left + width && mousePos.Y > top && mousePos.Y <= top + height;
-        }
-
-        private void CanvasView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (IsPlaying)
-            {
-                // Slight offset to not fully equal the start and endpoint.
-                float startX = (float)((double)Track.StartPoint / Track.TrackLength * width) + 1;
-                float endX = (float)((double)Track.LoopPoint / Track.TrackLength * width) - 1;
-
-                if (mousePos.X > startX && mousePos.X < endX)
-                {
-                    long pos = (long)(mousePos.X * Track.TrackLength / width);
-                    Track.RequestPlayPositionChange(pos);
-                }
-            }
-            else if (ctrlHeldDown)
-            {
-                shouldMoveTransitionPoint = true;
-            }
-            else if (!isDraggingEnd && !isDraggingStart)
-            {
-                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)) isDraggingStart = true;
-                else if (IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) isDraggingEnd = true;
-
-                if (isDraggingStart || isDraggingEnd)
-                {
-                    Mouse.Capture((IInputElement)sender);
-                }
-            }
-        }
-
-        private void CanvasView_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (shouldMoveTransitionPoint) shouldMoveTransitionPoint = false;
-            if (isDraggingStart) isDraggingStart = false;
-            else if (isDraggingEnd) isDraggingEnd = false;
-            Mouse.Capture(null);
-        }
-
-        private void CanvasView_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            mousePos = e.GetPosition(CanvasView);
-
-            if (ctrlHeldDown && 
-                (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize) || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) ||
-                ctrlHeldDown && shouldMoveTransitionPoint)
-            {
-                Mouse.OverrideCursor = Cursors.SizeWE;
-            }
-            else
-            {
-                Mouse.OverrideCursor = null;
-            }
-
-            if (!IsPlaying)
-            {
-                if (shouldMoveTransitionPoint && Track is not null)
-                {
-                    if (!ctrlHeldDown)
-                    {
-                        shouldMoveTransitionPoint = false;
-                    } else
-                    {
-                        long clamp = (Track.LoopPoint - Track.StartPoint) / 2;
-                        long proposedLength = (long)(mousePos.X * Track.TrackLength / width) - Track.StartPoint;
-                        Track.TransitionLength = Math.Max(0, Math.Min(clamp, proposedLength));
-                    }
-                }
-                else if (Track is not null && (isDraggingStart || isDraggingEnd))
-                {
-                    long clamp = (Track.LoopPoint - Track.StartPoint) / 2;
-                    Track.TransitionLength = Math.Max(0, Math.Min(clamp, Track.TransitionLength));
-                }
-                CanvasView.InvalidateVisual();
-            }
-        }
-
-        private void OnTrackPlayPositionUpdated(object? sender, long e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                if (IsPlaying)
-                {
-                    playPosition = e;
-                    CanvasView.InvalidateVisual();
-                }
-            });
-        }
-
-        private void StaticKeyManager_OnKeyUp(object? sender, Key e)
-        {
-            if (ctrlHeldDown && e == Key.LeftCtrl)
-            {
-                ctrlHeldDown = false;
-                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize)
-                    || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize))
-                {
-                    Mouse.OverrideCursor = null;
-                }
-            }
-        }
-
-        private void StaticKeyManager_OnKeyDown(object? sender, Key e)
-        {
-            if (!ctrlHeldDown && e == Key.LeftCtrl)
-            {
-                ctrlHeldDown = true;
-                if (IsMouseWithinBounds(startCoordinate, 0, handleSize, handleSize) 
-                    || IsMouseWithinBounds(endCoordinate - handleSize - 1, 0, handleSize, handleSize)) {
-                    Mouse.OverrideCursor = Cursors.SizeWE;
-                }
-            }
         }
     }
 }

@@ -76,5 +76,16 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             }
             navigationService.RequestNavigationToSession(Session);
         }
+
+        public override void Cleanup()
+        {
+            foreach (TrackSessionViewModel vm in TrackViews)
+            {
+                vm.OnTrackChangeRequested -= OnTrackChangeRequested;
+            }
+
+            mixer?.Dispose();
+            GC.Collect();
+        }
     }
 }

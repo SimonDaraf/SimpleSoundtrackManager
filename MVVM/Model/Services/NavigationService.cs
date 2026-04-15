@@ -1,9 +1,8 @@
-﻿using SimpleSoundtrackManager.MVVM.Model.Data;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.View;
 using SimpleSoundtrackManager.MVVM.ViewModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
-using System.Windows.Forms;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
@@ -35,7 +34,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public void RequestSessionStart(Session session)
         {
-            stack.Clear();
+            CleanStack();
 
             if (tryNavigate(NavigationViews.ActiveSession) is ActiveSessionViewModel vm)
             {
@@ -49,7 +48,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         public void RequestNavigationToSession(Session session)
         {
             // A session is the root of all navigation, clear the stack.
-            stack.Clear();
+            CleanStack();
 
             if (tryNavigate(NavigationViews.SessionView) is SessionViewModel vm)
             {
@@ -63,8 +62,24 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public void TryPopViewFromStack()
         {
-            stack.Pop();
+            ObservableObject obj = stack.Pop();
+            if (obj is NavigatableViewModel vm)
+            {
+                vm.Cleanup();
+            }
             OnNavigationRequested?.Invoke(this, stack.Peek());
+        }
+
+        private void CleanStack()
+        {
+            foreach (ObservableObject obj in stack)
+            {
+                if (obj is NavigatableViewModel vm)
+                {
+                    vm.Cleanup();
+                }
+            }
+            stack.Clear();
         }
     }
 

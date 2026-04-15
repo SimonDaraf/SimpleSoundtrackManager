@@ -67,7 +67,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             int bytesPerSample = WaveFormat.BitsPerSample / 8;
             byte[] bytesRead = new byte[count * bytesPerSample];
 
-            long positionBefore = stream.Position;
             int read = stream.Read(bytesRead, offset, count * bytesPerSample);
             int samplesRead = read / bytesPerSample;
 

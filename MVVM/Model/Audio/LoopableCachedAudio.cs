@@ -30,13 +30,15 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public long StartPosition { get => track.StartPoint; }
         public long LoopPosition { get => track.LoopPoint; }
-        public long TransitionLength { get => track.TransitionLength;}
-        public float Volume { get => track.TrackVolume;}
+        public long TransitionLength { get => track.TransitionLength; }
+        public long TrackLength { get; private set; }
+        public float Volume { get => track.TrackVolume; }
 
         public LoopableCachedAudio(Track track, CachedAudio cachedAudio)
         {
             audio = cachedAudio;
             this.track = track;
+            TrackLength = track.TrackLength;
             audio.Position = StartPosition;
             copy = audio.CloneCachedAudio();
         }
@@ -53,6 +55,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public int Read(float[] buffer, int offset, int count)
         {
+            int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
+
             if (TransitionLength == 0)
             {
                 // If no transition, just check whenever we are passed loop and read from the beginning.
@@ -62,7 +66,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                     buffer[i + offset] *= Volume;
                 }
 
-                if (Position >= LoopPosition)
+                if (Position >= LoopPosition || samplesRead < count)
                 {
                     Position = StartPosition;
                 }
@@ -72,10 +76,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             }
             else
             {
-                int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
                 HandleFadeInState(audio.Position);
                 if (isFading && !IsInStartFadeRegion(audio.Position))
                 {
+                    if (Position >= LoopPosition)
+                    {
+                        (audio, copy) = (copy, audio);
+                    }
+
                     float[] copyBuffer = new float[count];
                     FillSampleDuringFade(copyBuffer, count);
                     int samplesRead = audio.Read(buffer, offset, count);
@@ -86,7 +94,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                         // If we have read past the loop point. We can just continue to read from the copy, next
                         // read phase will read from the copy anyways so we might as well continue to do so.
                         long samplePosition = byteStartPosition + (i * bytesPerSample);
-                        if (samplePosition >= LoopPosition)
+                        if (samplePosition >= LoopPosition || samplesRead < count)
                         {
                             buffer[i + offset] = copyBuffer[i] * Volume;
                         }
@@ -106,8 +114,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                     long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
                     for (int i = 0; i < samplesRead; i++)
                     {
-                        float fadeVolume = GetFadeVolumeFactor(byteStartPosition + (i * bytesPerSample));
+                        long samplePosition = byteStartPosition + (i * bytesPerSample);
+                        float fadeVolume = GetFadeVolumeFactor(samplePosition);
                         buffer[i + offset] *= Volume * fadeVolume;
+                    }
+
+                    if (Position >= LoopPosition || samplesRead < count)
+                    {
+                        audio.Position = StartPosition;
                     }
 
                     DispatchPositionUpdatedEvent();
@@ -155,7 +169,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         private bool IsInEndFadeRegion(long position)
         {
-            return position >= LoopPosition - TransitionLength && position <= LoopPosition; ;
+            return position >= LoopPosition - TransitionLength && position <= LoopPosition;
         }
 
         private float GetFadeVolumeFactor(long position)

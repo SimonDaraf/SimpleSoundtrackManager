@@ -24,7 +24,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public void Init(Track track)
         {
-            if (tracks.TryGetValue(track, out LoopableCachedAudio audio))
+            if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))
             {
                 if (sessionTrack is not null)
                     throw new Exception("Cannot initialize session mixer, already initialized.");
@@ -44,7 +44,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public void RequestChange(Track track)
         {
-            return;
+            if (sessionTrack is null)
+                return;
+
+            if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))
+            {
+                sessionTrack.RequestReplacement(audio);
+            }
         }
 
         public void Stop()

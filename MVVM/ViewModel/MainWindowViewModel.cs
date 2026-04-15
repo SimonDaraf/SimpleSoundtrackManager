@@ -1,10 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using SimpleSoundtrackManager.MVVM.Model.Utils;
-using System.Media;
 using System.Windows;
 using System.Windows.Input;
 
@@ -88,7 +86,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void OpenSession()
         {
             MessageBoxResult result = TrySaveChanges();
-            if (result == MessageBoxResult.Cancel) return;
+            if (result == MessageBoxResult.Cancel || result == MessageBoxResult.None) return;
 
             Session? session = sessionManager.BrowseSession();
 
@@ -102,7 +100,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void NewSession()
         {
             MessageBoxResult result = TrySaveChanges();
-            if (result == MessageBoxResult.Cancel) return;
+            if (result == MessageBoxResult.Cancel || result == MessageBoxResult.None) return;
 
             Window w = navigationService.GetCreateNewWindow();
             w.Owner = App.Current.MainWindow;
@@ -129,7 +127,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [RelayCommand]
         private void Exit()
         {
-            App.Current.Shutdown();
+            MessageBoxResult res = TrySaveChanges();
+            if (res == MessageBoxResult.None || res == MessageBoxResult.Cancel)
+                return;
+            App.Current.MainWindow.Close();
         }
 
         private MessageBoxResult TrySaveChanges()

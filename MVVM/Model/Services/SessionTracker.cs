@@ -31,7 +31,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 if (res == MessageBoxResult.Yes)
                 {
                     Serializer.ToBinary(ActiveSession, ActiveSession.FullPath);
-                } else if (res == MessageBoxResult.Cancel)
+                } else if (res == MessageBoxResult.Cancel || res == MessageBoxResult.None)
                 {
                     e.Cancel = true;
                 }

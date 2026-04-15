@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
         <StackPanel Margin="10">
             <TextBlock Text="Name" Foreground="{StaticResource Foreground}" Margin="0, 0, 0,5"/>
-            <TextBox Foreground="{StaticResource Foreground}" Style="{StaticResource TextBoxStyle}" Text="{Binding Name}" Margin="0, 0, 0, 5"/>
+            <TextBox Foreground="{StaticResource Foreground}" Style="{StaticResource TextBoxStyle}" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0, 0, 0, 5"/>
             <TextBlock Text="Location" Foreground="{StaticResource Foreground}" Margin="0, 0, 0,5"/>
             <Grid Margin="0, 0, 0, 5">
                 <Grid.ColumnDefinitions>

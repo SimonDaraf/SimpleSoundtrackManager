@@ -40,13 +40,32 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             }
             else
             {
-                // Do stuff later
+                int bpsToReplace = toReplace.WaveFormat.BitsPerSample / 8;
                 samplesRead = audio.Read(buffer, offset, count);
                 copy = new float[samplesRead];
+
+                // Create replacement buffer.
+                float[] rBuffer = new float[samplesRead];
+                int rSamplesRead = toReplace.Read(rBuffer, 0, samplesRead);
+
+                long rStartPos = toReplace.Position - (bpsToReplace * samplesRead);
                 for (int i = 0; i < samplesRead; i++)
                 {
-                    buffer[i + offset] *= Volume;
+                    long rSamplePos = rStartPos + (i * bpsToReplace);
+                    float transitionVolume = 1f;
+
+                    if (toReplace.StartPosition > 0 || toReplace.TransitionLength > 0)
+                        transitionVolume = Math.Max(0, Math.Min(1, rSamplePos / (float)(toReplace.StartPosition + toReplace.TransitionLength)));
+                    buffer[i + offset] = ((rBuffer[i] * transitionVolume) + (buffer[i + offset] * (1 - transitionVolume))) * Volume;
+
+                    // This is just to dispatch waveform info to any external visual component.
                     copy[i] = buffer[i + offset];
+                }
+
+                if (toReplace.Position >= toReplace.StartPosition + toReplace.TransitionLength)
+                {
+                    audio = toReplace;
+                    toReplace = null;
                 }
             }
 

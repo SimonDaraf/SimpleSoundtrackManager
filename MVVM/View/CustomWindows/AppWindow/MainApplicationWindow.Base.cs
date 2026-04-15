@@ -192,7 +192,7 @@ namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
 
         public override void ButtonCross_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            Close();
         }
     }
 }

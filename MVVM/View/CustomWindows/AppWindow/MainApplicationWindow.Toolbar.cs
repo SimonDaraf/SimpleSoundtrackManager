@@ -56,7 +56,7 @@ namespace SimpleSoundtrackManager.MVVM.View.CustomWindows.AppWindow
             else
             {
                 e.Handled = true;
-                Application.Current.Shutdown();
+                Close();
             }
         }
     }

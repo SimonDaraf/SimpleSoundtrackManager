@@ -63,6 +63,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [ObservableProperty]
         private long playPosition;
 
+        [IgnoreMember]
+        [ObservableProperty]
+        private int channels = 1;
+
+        [IgnoreMember]
+        [ObservableProperty]
+        private int sampleRate = 44100;
+
         public void ForceUpdateMsView()
         {
             long msStart = BytePosToMs(StartPoint);

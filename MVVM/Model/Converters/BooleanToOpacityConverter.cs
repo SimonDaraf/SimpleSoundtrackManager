@@ -7,6 +7,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
+            if (values[0] is not bool || values[1] is not bool)
+                return 0;
             bool isMouseOver = (bool)values[0];
             bool isActive = (bool)values[1];
 

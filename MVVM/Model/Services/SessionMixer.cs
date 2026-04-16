@@ -18,7 +18,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             this.tracks = new Dictionary<Track, LoopableCachedAudio>();
             foreach (Track track in tracks)
             {
-                this.tracks.Add(track, new LoopableCachedAudio(track, new CachedAudio(track.FilePath)));
+                LoopableCachedAudio audio = new LoopableCachedAudio(track, new CachedAudio(track.FilePath));
+                track.Channels = audio.WaveFormat.Channels;
+                track.SampleRate = audio.WaveFormat.SampleRate;
+                this.tracks.Add(track, audio);
             }
         }
 

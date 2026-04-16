@@ -122,7 +122,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void Exit()
         {
             MessageBoxResult res = TrySaveChanges();
-            if (res == MessageBoxResult.None || res == MessageBoxResult.Cancel)
+            if (res == MessageBoxResult.Cancel)
                 return;
             App.Current.MainWindow.Close();
         }

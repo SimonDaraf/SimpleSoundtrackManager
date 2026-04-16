@@ -120,7 +120,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                         session.Tracks.Remove(t);
                     }
                 }
-
                 // Finally save.
                 Serializer.ToBinary(session, session.FullPath);
             }
@@ -152,6 +151,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 {
                     Session session = Serializer.Deserialize<Session>(fileInfo.FullName);
                     session.LastModified = fileInfo.LastWriteTime.ToShortDateString();
+                    if (!session.FullPath.Equals(fileInfo.FullName))
+                    {
+                        // Attempt path recovery.
+                        string dir = Path.GetDirectoryName(fileInfo.FullName) ?? throw new Exception("Invalid file path state.");
+                        session.DirectoryPath = dir;
+                        session.FullPath = dir + session.Name + ".ssm";
+                    }
                     sessions.Add(session);
                 }
                 catch (Exception ex)

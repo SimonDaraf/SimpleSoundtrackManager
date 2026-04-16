@@ -76,7 +76,12 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void Delete()
         {
             if (Track is null) return;
-            sessionTracker.RemoveTrackFromActiveSesion(Track);
+            if (MessageBox.Show("You are about to delete a track, do you want to continue?", 
+                "Question", MessageBoxButton.YesNo, 
+                MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                sessionTracker.RemoveTrackFromActiveSesion(Track);
+            }
         }
 
         [RelayCommand]

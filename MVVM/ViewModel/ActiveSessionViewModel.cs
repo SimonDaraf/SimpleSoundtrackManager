@@ -23,9 +23,20 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private string status = $"Loading...";
 
+        [ObservableProperty]
+        private float volume = 1;
+
         public ActiveSessionViewModel(NavigationService navigationService)
         {
             this.navigationService = navigationService;
+        }
+
+        partial void OnVolumeChanged(float value)
+        {
+            if (mixer is null)
+                return;
+
+            mixer.SetVolume(value);
         }
 
         public override void OnNavigation()

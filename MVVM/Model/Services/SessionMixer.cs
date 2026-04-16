@@ -25,6 +25,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
+        public void SetVolume(float volume)
+        {
+            if (sessionTrack is null)
+                return;
+            sessionTrack.Volume = volume;
+        }
+
         public void Init(Track track)
         {
             if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))

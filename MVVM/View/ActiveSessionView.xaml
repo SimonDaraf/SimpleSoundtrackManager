@@ -35,9 +35,19 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Style="{StaticResource ButtonStyle}" Content="End Session" Padding="10, 0" Height="25"
-                    Command="{Binding EndSessionCommand}"/>
-                <TextBlock Grid.Column="2" Text="{Binding Status}" Foreground="{StaticResource Foreground}" VerticalAlignment="Center" Margin="10, 0"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource ButtonStyle}" Content="End Session" Padding="10, 0" Height="25"
+                            Command="{Binding EndSessionCommand}"/>
+                    <TextBlock  Text="{Binding Status}" Foreground="{StaticResource Foreground}" VerticalAlignment="Center" Margin="10, 0"
+                                HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" Margin="10, 0">
+                    <TextBlock Margin="0, 0, 10, 0" Text="Volume: " Foreground="{StaticResource Foreground}" FontSize="14" VerticalAlignment="Center"/>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding Volume}" 
+                            Width="150" Style="{StaticResource VolumeSliderStyle}"
+                            SmallChange="0.01" LargeChange="0.1" TickFrequency="0.01" TickPlacement="None"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

@@ -57,8 +57,15 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         {
             int bytesPerSample = audio.WaveFormat.BitsPerSample / 8;
 
+            // Check if this read will advance past the  tracks length. To stop it from removing itself from existens,
+            // use this conditional to perform a reset.
+            bool willReachEnd = audio.Position + (count * bytesPerSample) >= TrackLength;
+
             if (TransitionLength == 0)
             {
+                if (willReachEnd)
+                    audio.Position = StartPosition;
+
                 // If no transition, just check whenever we are passed loop and read from the beginning.
                 int samplesRead = audio.Read(buffer, offset, count);
                 for (int i = 0; i < samplesRead; i++)
@@ -79,8 +86,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 HandleFadeInState(audio.Position);
                 if (isFading && !IsInStartFadeRegion(audio.Position))
                 {
-                    if (Position >= LoopPosition)
+                    if (willReachEnd)
                     {
+                        isFading = false;
                         (audio, copy) = (copy, audio);
                     }
 
@@ -119,7 +127,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                         buffer[i + offset] *= Volume * fadeVolume;
                     }
 
-                    if (Position >= LoopPosition || samplesRead < count)
+                    if (willReachEnd)
                     {
                         audio.Position = StartPosition;
                     }

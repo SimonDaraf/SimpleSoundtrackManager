@@ -1,0 +1,2 @@
+﻿* Fixed an issue where an incorrect conditional check caused the exit button to not properly shut down the application.
+* Fixed an issue where a waveform missmatch betweeen the wave out event and desired audio track caused the audio to be malformed.

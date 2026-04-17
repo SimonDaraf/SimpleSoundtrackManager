@@ -28,17 +28,24 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         private CachedAudio copy;
         private Track track;
 
-        public long StartPosition { get => track.StartPoint; }
-        public long LoopPosition { get => track.LoopPoint; }
-        public long TransitionLength { get => track.TransitionLength; }
-        public long TrackLength { get; private set; }
+        public long StartPosition { get; private set; }
+        public long LoopPosition { get; private set; }
+        public long TransitionLength { get; private set; }
+        public long TrackLength { get => audio.Length; }
         public float Volume { get => track.TrackVolume; }
 
         public LoopableCachedAudio(Track track, CachedAudio cachedAudio)
         {
             audio = cachedAudio;
+
+            // As we now can map the cached audio data to a specified wave format. We will need to scale the different time points specified.
+            // But these will only persist when actually reading the data.
+            float scalingFactor = (float)audio.Length / track.TrackLength;
+            LoopPosition = audio.AlignBytes((long)(track.LoopPoint * scalingFactor));
+            StartPosition = audio.AlignBytes((long)(track.StartPoint * scalingFactor));
+            TransitionLength = audio.AlignBytes((long)(track.TransitionLength * scalingFactor));
+
             this.track = track;
-            TrackLength = track.TrackLength;
             audio.Position = StartPosition;
             copy = audio.CloneCachedAudio();
         }

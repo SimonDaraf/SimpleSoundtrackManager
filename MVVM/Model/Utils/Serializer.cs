@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 using System.IO;
+using System.Windows;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Utils
 {
@@ -16,9 +17,16 @@ namespace SimpleSoundtrackManager.MVVM.Model.Utils
         /// <param name="filePath">The file path to save the file to.</param>
         public static void ToBinary<T>(T toSerialize, string filePath)
         {
-            using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
-            MessagePackSerializer.Serialize(fileStream, toSerialize); // Serialize and write.
-            fileStream.Dispose();
+            try
+            {
+                using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                MessagePackSerializer.Serialize(fileStream, toSerialize); // Serialize and write.
+                fileStream.Dispose();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show($"Failed to save changes to {filePath}, access denied. Please make sure you have access to modify this file. ", "Error", MessageBoxButton.OK);
+            }
         }
 
         /// <summary>

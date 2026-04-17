@@ -3,6 +3,7 @@ using SimpleSoundtrackManager.MVVM.Model.Audio;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using SkiaSharp;
+using System.Diagnostics;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
@@ -68,7 +69,6 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
         private const int FftSize = 8192;
         private float[] barHeights = [];
-        private float[] buffer = [];
 
         private readonly double[] fftReal = new double[FftSize];
         private readonly double[] fftImag = new double[FftSize];
@@ -76,36 +76,44 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
         private float highestPeak = 1;
         private const float DecayPerFrame = 0.95f;
-        private float[] pendingBuffer = [];
-        private float[] activeBuffer = [];
-        private volatile bool bufferPending = false;
-
+        float[] lastFrame = [];
+        private readonly Queue<float[]> bufferQueue;
         private readonly DispatcherTimer renderTimer;
+        private readonly Stopwatch stopwatch;
+        private long lastElaspedTicks;
 
         public WaveformReactor()
         {
             InitializeComponent();
-
+            stopwatch = Stopwatch.StartNew();
             renderTimer = new DispatcherTimer(DispatcherPriority.Render)
             {
                 Interval = TimeSpan.FromSeconds(1.0 / 60.0)
             };
             renderTimer.Tick += RenderTimer_Tick;
-
             renderTimer.Start();
-
+            
+            bufferQueue = new Queue<float[]>();
             WeakReferenceMessenger.Default.Register<TrackBufferUpdatedEventArgs>(this, (o, m) =>
             {   
                 Dispatcher.InvokeAsync(() =>
                 {
+                    // We want to constantly provide newer samples, if for some reason we are behind, clear and start with newer ones.
+                    bufferQueue.Clear();
+
                     if (!m.TrackName.Equals(Track.Name) && !m.TrackName.Equals(Track.FilePath))
                         return;
 
-                    float[] copy = GC.AllocateUninitializedArray<float>(m.Buffer.Length);
-                    m.Buffer.CopyTo(copy, 0);
+                    int samplesPerSecond = SampleRate / 60 * ChannelCount;
 
-                    Interlocked.Exchange(ref pendingBuffer, copy);
-                    bufferPending = true;
+                    int i = 0;
+                    while (i + samplesPerSecond <= m.Buffer.Length)
+                    {
+                        float[] frameBuffer = new float[samplesPerSecond];
+                        Array.Copy(m.Buffer, i, frameBuffer, 0, samplesPerSecond);
+                        bufferQueue.Enqueue(frameBuffer);
+                        i += samplesPerSecond;
+                    }
                 });
             });
 
@@ -114,6 +122,19 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
         private void RenderTimer_Tick(object? sender, EventArgs e)
         {
+            long now = stopwatch.ElapsedTicks;
+            double elapsed = (double)(now - lastElaspedTicks) / Stopwatch.Frequency;
+            lastElaspedTicks = now;
+
+            int framesToConsume = (int)Math.Round(elapsed * 60);
+
+            for (int i = 0; i < framesToConsume; i++)
+            {
+                if (bufferQueue.TryDequeue(out float[]? buffer) && buffer is not null)
+                    lastFrame = buffer;
+                else lastFrame = [];
+            }
+
             CanvasView.InvalidateVisual();
         }
 
@@ -136,21 +157,13 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             canvas.Clear();
 
             int width = e.Info.Width;
-            float canvasHeight = e.Info.Height;
-
             if (barHeights.Length != width)
                 barHeights = new float[width];
 
-            bool hasNewAudio = bufferPending;
+            bool hasNewAudio = lastFrame.Length > 0;
             if (hasNewAudio)
             {
-                activeBuffer = Interlocked.Exchange(ref pendingBuffer, activeBuffer);
-                bufferPending = false;
-            }
-
-            if (hasNewAudio && activeBuffer.Length > 0)
-            {
-                float[] fft = RunFft(activeBuffer);
+                float[] fft = RunFft(lastFrame);
                 int usableBins = fft.Length;
                 float binsPerBar = (float)usableBins / width;
 
@@ -165,13 +178,12 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                         sum += fft[j];
 
                     float target = sum / (binEnd - binStart);
-                    float val = (barHeights[i] * 0.7f) + (target * 0.3f);
+                    float val = (barHeights[i] * 0.4f) + (target * 0.6f);
                     barHeights[i] = val;
                     if (val > highestPeak) highestPeak = val;
                 }
 
                 DrawBars(canvas, e.Info);
-                activeBuffer = [];
             }
             else
             {
@@ -184,6 +196,8 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
                 DrawBars(canvas, e.Info);
             }
+
+            lastFrame = [];
         }
 
         private void DrawBars(SKCanvas canvas, SkiaSharp.SKImageInfo info)

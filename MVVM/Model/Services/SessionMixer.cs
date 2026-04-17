@@ -18,7 +18,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             this.tracks = new Dictionary<Track, LoopableCachedAudio>();
             foreach (Track track in tracks)
             {
-                LoopableCachedAudio audio = new LoopableCachedAudio(track, new CachedAudio(track.FilePath, 44100));
+                LoopableCachedAudio audio = new LoopableCachedAudio(track, new CachedAudio(track.Name, track.FilePath, 44100));
+                audio.OnBufferRead += Audio_OnBufferRead;
                 track.Channels = audio.WaveFormat.Channels;
                 track.SampleRate = audio.WaveFormat.SampleRate;
                 this.tracks.Add(track, audio);
@@ -40,7 +41,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                     throw new Exception("Cannot initialize session mixer, already initialized.");
 
                 sessionTrack = new SessionTrack(audio);
-                sessionTrack.OnBufferProcessed += SessionTrack_OnBufferProcessed;
                 waveOut = new WaveOutEvent();
                 waveOut.Init(sessionTrack);
                 waveOut.Play();
@@ -69,21 +69,22 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             waveOut = null;
             if (sessionTrack is not null)
             {
-                sessionTrack.OnBufferProcessed -= SessionTrack_OnBufferProcessed;
                 sessionTrack.Dispose();
                 sessionTrack = null;
             }
         }
 
-        private void SessionTrack_OnBufferProcessed(object? sender, float[] e)
+        private void Audio_OnBufferRead(object? sender, TrackBufferUpdatedEventArgs e)
         {
             WeakReferenceMessenger.Default.Send(e);
+            return;
         }
 
         public void Dispose()
         {
             foreach (LoopableCachedAudio cachedAudio in tracks.Values)
             {
+                cachedAudio.OnBufferRead -= Audio_OnBufferRead;
                 cachedAudio.Dispose();
             }
         }

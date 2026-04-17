@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using SimpleSoundtrackManager.MVVM.Model.Audio;
+using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using SkiaSharp;
 using System.Numerics;
@@ -44,6 +46,16 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             set => SetValue(ChannelCountProperty, value);
         }
 
+        public static readonly DependencyProperty TrackProperty =
+        DependencyProperty.Register(nameof(Track), typeof(Track),
+            typeof(WaveformReactor), new PropertyMetadata(default(Track)));
+
+        public Track Track
+        {
+            get => (Track)GetValue(TrackProperty);
+            set => SetValue(TrackProperty, value);
+        }
+
         public static readonly DependencyProperty SampleRateProperty =
         DependencyProperty.Register(nameof(SampleRate), typeof(int),
             typeof(WaveformReactor), new PropertyMetadata(44100));
@@ -63,7 +75,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
         private readonly float[] fftMagnitudes = new float[FftSize / 2];
 
         private float highestPeak = 1;
-        private const float DecayPerFrame = 0.85f;
+        private const float DecayPerFrame = 0.95f;
         private float[] pendingBuffer = [];
         private float[] activeBuffer = [];
         private volatile bool bufferPending = false;
@@ -82,16 +94,15 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
 
             renderTimer.Start();
 
-            WeakReferenceMessenger.Default.Register<float[]>(this, (o, m) =>
-            {
-                float[] copy = [.. m];
-                
+            WeakReferenceMessenger.Default.Register<TrackBufferUpdatedEventArgs>(this, (o, m) =>
+            {   
                 Dispatcher.InvokeAsync(() =>
                 {
-                    if (!IsPlaying)
+                    if (!m.TrackName.Equals(Track.Name) && !m.TrackName.Equals(Track.FilePath))
                         return;
-                    float[] copy = GC.AllocateUninitializedArray<float>(m.Length);
-                    m.CopyTo(copy, 0);
+
+                    float[] copy = GC.AllocateUninitializedArray<float>(m.Buffer.Length);
+                    m.Buffer.CopyTo(copy, 0);
 
                     Interlocked.Exchange(ref pendingBuffer, copy);
                     bufferPending = true;
@@ -148,7 +159,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
                         sum += fft[j];
 
                     float target = sum / (binEnd - binStart);
-                    float val = (barHeights[i] * 0.5f) + (target * 0.5f);
+                    float val = (barHeights[i] * 0.7f) + (target * 0.3f);
                     barHeights[i] = val;
                     if (val > highestPeak) highestPeak = val;
                 }

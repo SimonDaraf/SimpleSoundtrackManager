@@ -9,6 +9,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         public long Position { get; set; }
     }
 
+    public class TrackBufferUpdatedEventArgs : EventArgs
+    {
+        public string TrackName { get; set; } = string.Empty;
+        public float[] Buffer { get; set; } = [];
+    }
+
     public enum FadeRegion
     {
         None,
@@ -21,6 +27,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
     /// </summary>
     public class LoopableCachedAudio : ISampleProvider, IDisposable
     {
+        public event EventHandler<TrackBufferUpdatedEventArgs>? OnBufferRead;
         public event EventHandler<TrackPositionUpdatedEventArgs>? OnPositionUpdated;
         private bool isFading;
         private FadeRegion lastFadeRegion = FadeRegion.None;
@@ -67,6 +74,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             // Check if this read will advance past the  tracks length. To stop it from removing itself from existens,
             // use this conditional to perform a reset.
             bool willReachEnd = audio.Position + (count * bytesPerSample) >= TrackLength;
+            float[] toVisual;
 
             if (TransitionLength == 0)
             {
@@ -75,9 +83,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
                 // If no transition, just check whenever we are passed loop and read from the beginning.
                 int samplesRead = audio.Read(buffer, offset, count);
+                toVisual = new float[samplesRead];
                 for (int i = 0; i < samplesRead; i++)
                 {
                     buffer[i + offset] *= Volume;
+                    toVisual[i] = buffer[i + offset];
                 }
 
                 if (Position >= LoopPosition || samplesRead < count)
@@ -86,6 +96,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 }
 
                 DispatchPositionUpdatedEvent();
+                DispatchAudioBufferUpdate(toVisual);
                 return samplesRead;
             }
             else
@@ -102,7 +113,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                     float[] copyBuffer = new float[count];
                     FillSampleDuringFade(copyBuffer, count);
                     int samplesRead = audio.Read(buffer, offset, count);
-
+                    toVisual = new float[samplesRead];
                     long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
                     for (int i = 0; i < samplesRead; i++)
                     {
@@ -112,26 +123,31 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                         if (samplePosition >= LoopPosition || samplesRead < count)
                         {
                             buffer[i + offset] = copyBuffer[i] * Volume;
+                            toVisual[i] = buffer[i + offset];
                         }
                         else
                         {
                             float fadeVolume = GetFadeVolumeFactor(samplePosition);
                             buffer[i + offset] = ((buffer[i + offset] * fadeVolume) + (copyBuffer[i] * (1f - fadeVolume))) * Volume;
+                            toVisual[i] = buffer[i + offset];
                         }
                     }
 
+                    DispatchAudioBufferUpdate(toVisual);
                     DispatchPositionUpdatedEvent();
                     return samplesRead;
                 }
                 else
                 {
                     int samplesRead = audio.Read(buffer, offset, count);
+                    toVisual = new float[samplesRead];
                     long byteStartPosition = audio.Position - (bytesPerSample * samplesRead);
                     for (int i = 0; i < samplesRead; i++)
                     {
                         long samplePosition = byteStartPosition + (i * bytesPerSample);
                         float fadeVolume = GetFadeVolumeFactor(samplePosition);
                         buffer[i + offset] *= Volume * fadeVolume;
+                        toVisual[i] = buffer[i + offset];
                     }
 
                     if (willReachEnd)
@@ -139,6 +155,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                         audio.Position = StartPosition;
                     }
 
+                    DispatchAudioBufferUpdate(toVisual);
                     DispatchPositionUpdatedEvent();
                     return samplesRead;
                 }
@@ -220,6 +237,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 Position = Position,
                 Track = track
             });
+        }
+
+        private void DispatchAudioBufferUpdate(float[] buffer)
+        {
+            Task.Run(() => OnBufferRead?.Invoke(this, new TrackBufferUpdatedEventArgs { Buffer = buffer, TrackName = audio.TrackName }));
         }
 
         public void Dispose()

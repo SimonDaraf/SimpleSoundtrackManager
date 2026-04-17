@@ -10,9 +10,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
     /// </summary>
     public class CachedAudio : ISampleProvider, IDisposable
     {
-        private MemoryStream stream;
         public WaveFormat WaveFormat { get; private set; }
         public long Length { get => stream.Length; }
+        public string TrackName { get => trackName ?? filePath; }
+
+        private readonly string? trackName;
+        private readonly string filePath;
+        private readonly MemoryStream stream;
 
         public long Position
         {
@@ -25,6 +29,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public CachedAudio(string filePath)
         {
+            this.filePath = filePath;
             using AudioFileReader fileReader = new AudioFileReader(filePath);
             WaveFormat = fileReader.WaveFormat;
             byte[] buffer = new byte[fileReader.Length];
@@ -40,6 +45,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public CachedAudio(string filePath, int targetSampleRate)
         {
+            this.filePath = filePath;
             using AudioFileReader fileReader = new AudioFileReader(filePath);
 
             ISampleProvider provider = fileReader.WaveFormat.SampleRate != targetSampleRate
@@ -65,17 +71,31 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             stream = new MemoryStream([..bytes]);
         }
 
+        public CachedAudio(string trackName, string filePath, int targetSampleRate) : this(filePath, targetSampleRate)
+        {
+            this.trackName = trackName;
+        }
+
         public CachedAudio CloneCachedAudio()
         {
             long pos = stream.Position;
             stream.Position = 0;
             MemoryStream newStream = new MemoryStream(stream.ToArray());
             stream.Position = pos;
-            return new CachedAudio(newStream, WaveFormat);
+            return trackName is null ? new CachedAudio(filePath, newStream, WaveFormat) : new CachedAudio(trackName, filePath, newStream, WaveFormat);
         }
 
-        private CachedAudio(MemoryStream stream, WaveFormat waveFormat)
+        private CachedAudio(string filePath, MemoryStream stream, WaveFormat waveFormat)
         {
+            this.filePath = filePath;
+            this.stream = stream;
+            WaveFormat = waveFormat;
+        }
+
+        private CachedAudio(string trackName, string filePath, MemoryStream stream, WaveFormat waveFormat)
+        {
+            this.trackName = trackName;
+            this.filePath = filePath;
             this.stream = stream;
             WaveFormat = waveFormat;
         }
@@ -99,12 +119,13 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
             int read = stream.Read(bytesRead, 0, count * bytesPerSample);
             int samplesRead = read / bytesPerSample;
+            float[] copy = new float[samplesRead];
 
             for (int i = 0; i < samplesRead; i++)
             {
                 buffer[i + offset] = BitConverter.ToSingle(bytesRead, i * bytesPerSample);
+                copy[i] = buffer[i + offset];
             }
-
             return samplesRead;
         }
     }

@@ -90,7 +90,7 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             {
                 Interval = TimeSpan.FromSeconds(1.0 / 60.0)
             };
-            renderTimer.Tick += (_, _) => CanvasView.InvalidateVisual();
+            renderTimer.Tick += RenderTimer_Tick;
 
             renderTimer.Start();
 
@@ -112,11 +112,17 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             Unloaded += WaveformReactor_Unloaded;
         }
 
+        private void RenderTimer_Tick(object? sender, EventArgs e)
+        {
+            CanvasView.InvalidateVisual();
+        }
+
         private void WaveformReactor_Unloaded(object sender, RoutedEventArgs e)
         {
             renderTimer.Stop();
             WeakReferenceMessenger.Default.Unregister<float[]>(this);
             Unloaded -= WaveformReactor_Unloaded;
+            renderTimer.Tick -= RenderTimer_Tick;
         }
 
         private SKColor WpfToSkiasharpColor(Color color)

@@ -10,7 +10,6 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
     /// </summary>
     public class CachedAudio : ISampleProvider, IDisposable
     {
-        private readonly object _lock = new object();
         private MemoryStream stream;
         public WaveFormat WaveFormat { get; private set; }
         public long Length { get => stream.Length; }
@@ -68,14 +67,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public CachedAudio CloneCachedAudio()
         {
-            lock (_lock)
-            {
-                long pos = stream.Position;
-                stream.Position = 0;
-                MemoryStream newStream = new MemoryStream(stream.ToArray());
-                stream.Position = pos;
-                return new CachedAudio(newStream, WaveFormat);
-            }
+            long pos = stream.Position;
+            stream.Position = 0;
+            MemoryStream newStream = new MemoryStream(stream.ToArray());
+            stream.Position = pos;
+            return new CachedAudio(newStream, WaveFormat);
         }
 
         private CachedAudio(MemoryStream stream, WaveFormat waveFormat)

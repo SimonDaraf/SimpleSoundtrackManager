@@ -58,9 +58,15 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             return corrupt.Length > 0;
         }
 
-        private bool TryRecoverLostAudioFile(Track track)
+        private bool TryRecoverLostAudioFile(Session session, Track track)
         {
             string audioDirectory = Path.GetDirectoryName(track.FilePath) ?? throw new Exception("Invalid path state");
+            if (!Directory.Exists(audioDirectory))
+            {
+                audioDirectory = Path.Combine(session.DirectoryPath, "AudioFiles");
+                Directory.CreateDirectory(audioDirectory);
+            }
+            
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = $"Recover {track.Name}";
             openFileDialog.Multiselect = false;
@@ -71,7 +77,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
             if (result == true)
             {
-                File.Delete(track.FilePath);
+                // Most problems come from someone trying to open a session created on another computer.
+                if (File.Exists(track.FilePath))
+                {
+                    File.Delete(track.FilePath);
+                }
 
                 string selectedPath = Path.GetDirectoryName(openFileDialog.FileName) ?? throw new Exception("Invalid path state");
                 string finalPath = openFileDialog.FileName;
@@ -86,6 +96,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 track.TrackLength = length;
                 track.LengthInMs = ms;
                 track.FilePath = finalPath;
+                track.LoopPoint = length;
+                track.TrackVolume = 0.5f;
                 return true;
             }
 
@@ -100,14 +112,14 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         {
             if (IsSessionCorrupt(session, out Track[] corrupt))
             {
-                MessageBoxResult res = MessageBox.Show($"Found {corrupt.Length} missing audio files in session, do you wish to try to recover these? If not they will be removved from the session",
+                MessageBoxResult res = MessageBox.Show($"Found {corrupt.Length} missing audio files in session, do you wish to try to recover these? If not they will be removed from the session",
                     "Error", MessageBoxButton.YesNo, MessageBoxImage.Error);
 
                 if (res == MessageBoxResult.Yes)
                 {
                     foreach (Track t in corrupt)
                     {
-                        if (!TryRecoverLostAudioFile(t))
+                        if (!TryRecoverLostAudioFile(session, t))
                         {
                             session.Tracks.Remove(t);
                         }
@@ -151,12 +163,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 {
                     Session session = Serializer.Deserialize<Session>(fileInfo.FullName);
                     session.LastModified = fileInfo.LastWriteTime.ToShortDateString();
-                    if (!session.FullPath.Equals(fileInfo.FullName))
+                    if (!File.Exists(session.FullPath))
                     {
                         // Attempt path recovery.
                         string dir = Path.GetDirectoryName(fileInfo.FullName) ?? throw new Exception("Invalid file path state.");
                         session.DirectoryPath = dir;
-                        session.FullPath = dir + session.Name + ".ssm";
+                        session.FullPath = dir;
                     }
                     sessions.Add(session);
                 }
@@ -259,6 +271,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 track.TrackLength = length;
                 track.LengthInMs = ms;
                 track.FilePath = finalPath;
+                track.LoopPoint = length;
+                track.TrackVolume = 0.5f;
             }
         }
 

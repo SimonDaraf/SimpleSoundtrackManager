@@ -77,7 +77,7 @@ namespace SimpleSoundtrackManager
                 SessionTracker sessionTracker = provider.GetRequiredService<SessionTracker>();
                 return track =>
                 {
-                    var vm = new TrackSelectorViewModel(sessionManager, sessionTracker, audioPlayer);
+                    TrackSelectorViewModel vm = new TrackSelectorViewModel(sessionManager, sessionTracker, audioPlayer);
                     vm.Track = track;
                     return vm;
                 };

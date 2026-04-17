@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using SimpleSoundtrackManager.MVVM.Model.Utils;
+using SimpleSoundtrackManager.MVVM.View;
 using System.Windows;
 using System.Windows.Input;
 

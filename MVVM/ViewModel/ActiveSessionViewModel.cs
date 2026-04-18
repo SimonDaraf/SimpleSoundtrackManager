@@ -4,6 +4,7 @@ using SimpleSoundtrackManager.MVVM.Model;
 using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Services;
 using System.Collections.ObjectModel;
+using System.Windows.Forms;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
@@ -70,7 +71,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void OnTrackChangeRequested(object? sender, Track e)
         {
             if (mixer is null)
+            {
+                MessageBox.Show("Still caching audio data, please wait.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
+            }   
 
             if (sender is not null && sender is TrackSessionViewModel vm && vm.Track is not null)
             {

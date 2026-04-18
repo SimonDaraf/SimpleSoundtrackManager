@@ -19,6 +19,19 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         public ObservableCollection<Track> Tracks { get; set; } = [];
 
         [IgnoreMember]
+        private float volume;
+        [Key(4)]
+        public float Volume
+        {
+            get => volume;
+            set
+            {
+                MakeDirty();
+                volume = value;
+            }
+        }
+
+        [IgnoreMember]
         public string LastModified { get; set; } = string.Empty;
 
         [IgnoreMember]

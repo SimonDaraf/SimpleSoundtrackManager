@@ -1,5 +1,1 @@
-﻿* Fixed an issue where an incorrect conditional check caused the exit button to not properly shut down the application.
-* Fixed an issue where a waveform missmatch betweeen the wave out event and desired audio track caused the audio to be malformed.
-* Fixed an issue where if a session was imported from another computer, the missing filepaths would cause the application to crash.
-* Fix an issue where if a file was labeled by the OS as protected, writing to that file caused the application to crash.
-* Modiefied how audio data is dispatched so that each waveform only reacts to their tracks audio data.
+﻿* Keep session volume between sessions.

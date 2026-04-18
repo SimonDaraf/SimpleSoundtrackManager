@@ -37,12 +37,17 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 return;
 
             mixer.SetVolume(value);
+
+            if (Session is not null)
+                Session.Volume = value;
         }
 
         public override void OnNavigation()
         {
             if (Session is null)
                 throw new Exception("Session needs to be valid before navigating.");
+
+            Volume = Session.Volume;
 
             foreach (Track track in Session.Tracks)
             {

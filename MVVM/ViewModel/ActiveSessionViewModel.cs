@@ -64,6 +64,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             {
                 Status = "Caching Audio Data...";
                 mixer = new SessionMixer(Session.Tracks);
+                mixer.SetVolume(Volume);
                 Status = "Ready";
             });
         }

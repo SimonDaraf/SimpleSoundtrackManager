@@ -18,8 +18,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [Key(3)]
         public ObservableCollection<Track> Tracks { get; set; } = [];
 
-        [IgnoreMember]
         private float volume;
+
         [Key(4)]
         public float Volume
         {

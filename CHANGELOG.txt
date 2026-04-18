@@ -1,3 +1,4 @@
 ﻿* Keep session volume between sessions.
 * Display a warning a user attempts to play a track when audio is still being cached.
+* Allow track specific volume to be modified during an active session.
 * When an active track is clicked during a session it fades out instead of trying to play again from the beginning causing the position to jump all over between reads.

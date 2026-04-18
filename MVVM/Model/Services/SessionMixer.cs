@@ -26,6 +26,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
+        /// <summary>
+        /// Sets the global session volume.
+        /// </summary>
         public void SetVolume(float volume)
         {
             if (sessionTrack is null)
@@ -33,6 +36,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             sessionTrack.Volume = volume;
         }
 
+        /// <summary>
+        /// Initializes the session mixer with an initial track to play.
+        /// </summary>
         public void Init(Track track)
         {
             if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))
@@ -52,6 +58,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
+        /// <summary>
+        /// Requests a track change, if no track is playing this starts specified track.
+        /// If the same track is playing, make it fade out.
+        /// </summary>
         public void RequestChange(Track track)
         {
             if (sessionTrack is null)
@@ -75,6 +85,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             }
         }
 
+        /// <summary>
+        /// Stops the session.
+        /// </summary>
         public void Stop()
         {
             waveOut?.Stop();

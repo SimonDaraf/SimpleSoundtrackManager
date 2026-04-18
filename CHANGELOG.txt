@@ -1,1 +1,2 @@
 ﻿* Keep session volume between sessions.
+* When an active track is clicked during a session it fades out instead of trying to play again from the beginning causing the position to jump all over between reads.

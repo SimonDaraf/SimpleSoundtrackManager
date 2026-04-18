@@ -59,7 +59,19 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
             if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))
             {
-                sessionTrack.RequestReplacement(audio);
+                LoopableCachedAudio? cTrack = sessionTrack.GetCurrentPlayingTrack();
+                if (cTrack is null)
+                {
+                    sessionTrack.RequestStart(audio);
+                }
+                else if (cTrack is not null && cTrack.Equals(audio))
+                {
+                    sessionTrack.RequestFadeOut();
+                }
+                else
+                {
+                    sessionTrack.RequestReplacement(audio);
+                }  
             }
         }
 

@@ -100,6 +100,18 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             if (state is not SessionState.Empty)
                 return;
 
+            foreach (string key in overlays.Keys)
+            {
+                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(audio))
+                {
+                    // Handle edge case where we want to transition from an overlay to base track.
+                    overlays.Remove(key);
+                    this.audio = audio;
+                    state = SessionState.Playing;
+                    return;
+                }
+            }
+
             audio.Position = audio.StartPosition;
             this.audio = audio;
             state = SessionState.Playing;

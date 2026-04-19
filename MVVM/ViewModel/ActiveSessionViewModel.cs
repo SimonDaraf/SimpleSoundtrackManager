@@ -27,9 +27,23 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private float volume = 1;
 
+        [ObservableProperty]
+        private ObservableCollection<string> filters;
+
+        [ObservableProperty]
+        private string activeFilter = "All";
+
+        [ObservableProperty]
+        private bool showActive = false;
+
+        private List<TrackSessionViewModel> allTrackViews;
+
         public ActiveSessionViewModel(NavigationService navigationService)
         {
             this.navigationService = navigationService;
+            allTrackViews = new List<TrackSessionViewModel>();
+            filters = new ObservableCollection<string>();
+            Filters.Add("All");
         }
 
         partial void OnVolumeChanged(float value)
@@ -57,8 +71,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     Track = track,
                 };
                 vm.OnTrackChangeRequested += OnTrackChangeRequested;
-                TrackViews.Add(vm);
+                allTrackViews.Add(vm);
             }
+
+            Filter();
 
             Task.Run(() =>
             {
@@ -117,6 +133,37 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
                     Status = $"Playing: {vm.Track.Name}";
                 }
+            }
+
+            Filter();
+        }
+
+        partial void OnActiveFilterChanged(string value)
+        {
+            Filter();
+        }
+
+        partial void OnShowActiveChanged(bool value)
+        {
+            Filter();
+        }
+
+        private void Filter()
+        {
+            TrackViews.Clear();
+
+            foreach (TrackSessionViewModel vm in allTrackViews)
+            {
+                if (vm.Track is null)
+                    continue;
+
+                if (ShowActive && !vm.IsActive)
+                    continue;
+
+                if (!ActiveFilter.Equals("All") && !vm.Track.Category.Equals(ActiveFilter))
+                    continue;
+
+                TrackViews.Add(vm);
             }
         }
 

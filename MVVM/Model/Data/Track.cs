@@ -47,6 +47,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [ObservableProperty]
         private long lengthInMs;
 
+        [Key(9)]
+        [ObservableProperty]
+        private string category = "Default";
+
         [IgnoreMember]
         [ObservableProperty]
         private string startMsPoint = string.Empty;

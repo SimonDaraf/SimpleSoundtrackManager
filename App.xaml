@@ -16,6 +16,7 @@
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/ButtonStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/TextBoxStyle.xaml"/>
                 <ResourceDictionary Source="/MVVM/View/Styles/Components/SliderStyle.xaml"/>
+                <ResourceDictionary Source="/MVVM/View/Styles/Components/DropdownStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <converter:BooleanToVisibilityConverter x:Key="OpacityConverter"/>

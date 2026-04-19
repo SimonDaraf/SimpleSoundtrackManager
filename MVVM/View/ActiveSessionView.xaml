@@ -9,10 +9,21 @@
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=vm:ActiveSessionViewModel}">
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
-        <Grid>
+        <Border BorderThickness="0, 0, 0, 1" BorderBrush="{StaticResource DropdownBorder}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5">
+                <TextBlock Text="Filter:" Foreground="{StaticResource Foreground}" Margin="0, 0, 10, 0" VerticalAlignment="Center"/>
+                <ComboBox Style="{StaticResource DropdownStyle}" VerticalAlignment="Bottom"
+                ItemsSource="{Binding Filters}" SelectedValue="{Binding ActiveFilter}" MinWidth="100" Margin="0, 0, 20, 0"/>
+                <TextBlock Text="Show Active:" Foreground="{StaticResource Foreground}" Margin="0, 0, 10, 0" VerticalAlignment="Center"/>
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding ShowActive}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
             <ScrollViewer VerticalScrollBarVisibility="Hidden"
                           HorizontalScrollBarVisibility="Disabled"
                           Padding="10, 10, 10, 0" VerticalAlignment="Top">
@@ -26,7 +37,7 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
-        <Border Grid.Row="1" BorderBrush="{StaticResource DropdownBorder}"
+        <Border Grid.Row="2" BorderBrush="{StaticResource DropdownBorder}"
                 Padding="0, 10, 0, 0"
                 BorderThickness="0,1,0,0">
             <Grid>

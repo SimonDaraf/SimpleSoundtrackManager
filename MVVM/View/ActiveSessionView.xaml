@@ -14,12 +14,12 @@
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <Border BorderThickness="0, 0, 0, 1" BorderBrush="{StaticResource DropdownBorder}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 10">
                 <TextBlock Text="Filter:" Foreground="{StaticResource Foreground}" Margin="0, 0, 10, 0" VerticalAlignment="Center"/>
                 <ComboBox Style="{StaticResource DropdownStyle}" VerticalAlignment="Bottom"
                 ItemsSource="{Binding Filters}" SelectedValue="{Binding ActiveFilter}" MinWidth="100" Margin="0, 0, 20, 0"/>
                 <TextBlock Text="Show Active:" Foreground="{StaticResource Foreground}" Margin="0, 0, 10, 0" VerticalAlignment="Center"/>
-                <CheckBox VerticalAlignment="Center" IsChecked="{Binding ShowActive}"/>
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding ShowActive}" Style="{StaticResource CheckboxStyle}"/>
             </StackPanel>
         </Border>
 

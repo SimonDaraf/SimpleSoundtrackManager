@@ -87,6 +87,10 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                     state = SessionState.Empty;
                 }
             }
+            else
+            {
+                overlay.Position = overlay.StartPosition;
+            }
 
             overlays.Add(identifier, new OverlayFadeWrapper { OverlayAudio = overlay });
         }

@@ -1,14 +1,22 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SimpleSoundtrackManager.MVVM.Model.Data;
+using SimpleSoundtrackManager.MVVM.Model.Services;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace SimpleSoundtrackManager.MVVM.ViewModel
 {
-    public partial class TrackSessionViewModel : ObservableObject
+    public class OnTrackChangeRequestedEventArgs : EventArgs
     {
-        public event EventHandler<Track>? OnTrackChangeRequested;
+        public required Track Track { get; set; }
+        public bool IsOverlay { get; set; }
+    }
+
+    public partial class TrackSessionViewModel : ObservableObject, IDisposable
+    {
+        public event EventHandler<OnTrackChangeRequestedEventArgs>? OnTrackChangeRequested;
 
         [ObservableProperty]
         private Track? track;
@@ -18,6 +26,26 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
         [ObservableProperty]
         private bool isActive = false;
+
+        bool isShiftDown = false;
+
+        public TrackSessionViewModel()
+        {
+            StaticKeyManager.OnKeyDown += StaticKeyManager_OnKeyDown;
+            StaticKeyManager.OnKeyUp += StaticKeyManager_OnKeyUp;
+        }
+
+        private void StaticKeyManager_OnKeyUp(object? sender, Key e)
+        {
+            if (e == Key.LeftShift)
+                isShiftDown = false;
+        }
+
+        private void StaticKeyManager_OnKeyDown(object? sender, Key e)
+        {
+            if (e == Key.LeftShift)
+                isShiftDown = true;
+        }
 
         partial void OnTrackChanged(Track? value)
         {
@@ -44,7 +72,13 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private void Click()
         {
             if (Track is null) return;
-            OnTrackChangeRequested?.Invoke(this, Track);
+            OnTrackChangeRequested?.Invoke(this, new OnTrackChangeRequestedEventArgs { Track = Track, IsOverlay = isShiftDown });
+        }
+
+        public void Dispose()
+        {
+            StaticKeyManager.OnKeyDown -= StaticKeyManager_OnKeyDown;
+            StaticKeyManager.OnKeyUp -= StaticKeyManager_OnKeyUp;
         }
     }
 }

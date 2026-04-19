@@ -69,7 +69,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             });
         }
 
-        private void OnTrackChangeRequested(object? sender, Track e)
+        private void OnTrackChangeRequested(object? sender, OnTrackChangeRequestedEventArgs e)
         {
             if (mixer is null)
             {
@@ -79,18 +79,39 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
             if (sender is not null && sender is TrackSessionViewModel vm && vm.Track is not null)
             {
-                vm.IsActive = true;
+                if (e.IsOverlay)
+                {
+                    //vm.IsActive = true;
+                    if (!mixer.IsPlaying)
+                        mixer.InitEmpty();
 
-                if (currentActive is not null)
-                    currentActive.IsActive = false;
-
-                currentActive = vm;
-                if (!mixer.IsPlaying)
-                    mixer.Init(vm.Track);
+                    if (mixer.IsOverlay(vm.Track))
+                    {
+                        mixer.RemoveTrackAsOverlay(vm.Track);
+                        vm.IsActive = false;
+                    }
+                    else
+                    {
+                        mixer.AddTrackAsOverlay(vm.Track);
+                        vm.IsActive = true;
+                    }
+                    
+                }
                 else
-                    mixer.RequestChange(vm.Track);
+                {
+                    vm.IsActive = true;
 
-                Status = $"Playing: {vm.Track.Name}";
+                    if (currentActive is not null)
+                        currentActive.IsActive = false;
+
+                    currentActive = vm;
+                    if (!mixer.IsPlaying)
+                        mixer.Init(vm.Track);
+                    else
+                        mixer.RequestChange(vm.Track);
+
+                    Status = $"Playing: {vm.Track.Name}";
+                }
             }
         }
 
@@ -110,6 +131,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             foreach (TrackSessionViewModel vm in TrackViews)
             {
                 vm.OnTrackChangeRequested -= OnTrackChangeRequested;
+                vm.Dispose();
             }
 
             mixer?.Dispose();

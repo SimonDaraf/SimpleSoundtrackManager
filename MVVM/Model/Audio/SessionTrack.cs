@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio.Gui;
+using NAudio.Wave;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Audio
 {
@@ -10,11 +11,25 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         FadingOut,
     }
 
+    /// <summary>
+    /// Used to track when an overlay fade out was requested.
+    /// Keeping sessionTrack more clean.
+    /// </summary>
+    public class OverlayFadeWrapper
+    {
+        public required LoopableCachedAudio OverlayAudio { get; set; }
+        public bool FadeOut { get; set; } = false;
+        public long BytesReadSinceFadeOutRequest { get; set; } = 0;
+        public bool IsDone => BytesReadSinceFadeOutRequest >= OverlayAudio.TransitionLength;
+    }
+
     public class SessionTrack : ISampleProvider, IDisposable
     {
         private readonly ISampleProvider placeholder;
         private LoopableCachedAudio? audio;
         private LoopableCachedAudio? toReplace;
+
+        private Dictionary<string, OverlayFadeWrapper> overlays;
 
         private long fadeOutPos;
         private SessionState state;
@@ -23,8 +38,16 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         public float Volume { get; set; } = 1f;
 
+        public SessionTrack()
+        {
+            overlays = new Dictionary<string, OverlayFadeWrapper>();
+            placeholder = new EmptyAudioSource();
+            state = SessionState.Empty;
+        }
+
         public SessionTrack(LoopableCachedAudio audio)
         {
+            overlays = new Dictionary<string, OverlayFadeWrapper>();
             state = SessionState.Playing;
             this.audio = audio;
             placeholder = new EmptyAudioSource();
@@ -35,6 +58,43 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             return audio;
         }
 
+        /// <summary>
+        /// Returns whether a registered overlay with passed identifier exists.
+        /// </summary>
+        public bool IsOverlay(string identifier)
+        {
+            return overlays.ContainsKey(identifier);
+        }
+
+        /// <summary>
+        /// Appends an overlay track to the active session.
+        /// </summary>
+        public void AddOverlayTrack(string identifier, LoopableCachedAudio audio)
+        {
+            if (overlays.ContainsKey(identifier))
+                return;
+
+            overlays.Add(identifier, new OverlayFadeWrapper { OverlayAudio = audio });
+        }
+
+        /// <summary>
+        /// Removes a track as an overlay.
+        /// </summary>
+        public void RemoveOverlayTrack(string identifier)
+        {
+            if (!overlays.ContainsKey(identifier))
+                return;
+
+            if (!overlays.TryGetValue(identifier, out OverlayFadeWrapper? overlayTrack))
+                return;
+
+            overlayTrack.FadeOut = true;
+        }
+
+        /// <summary>
+        /// Requests that the session is started with specified track.
+        /// If session is already playing this does nothing, use replace instead.
+        /// </summary>
         public void RequestStart(LoopableCachedAudio audio)
         {
             if (state is not SessionState.Empty)
@@ -62,6 +122,20 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         /// </summary>
         public void RequestReplacement(LoopableCachedAudio audio)
         {
+            foreach (string key in overlays.Keys)
+            {
+                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(audio))
+                {
+                    // Handle edge case where we want to transition from an overlay to base track.
+                    overlays.Remove(key);
+                    if (this.audio is null)
+                    {
+                        this.audio = audio;
+                        state = SessionState.Playing;
+                        return;
+                    }
+                }
+            }
             audio.Position = audio.StartPosition;
             toReplace = audio;
             state = SessionState.Replacing;
@@ -81,7 +155,9 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
 
         private int Empty(float[] buffer, int offset, int count)
         {
-            return placeholder.Read(buffer, offset, count);
+            int samplesRead = placeholder.Read(buffer, offset, count);
+            ReadOverlay(buffer, offset, samplesRead);
+            return samplesRead;
         }
 
         private int Playing(float[] buffer, int offset, int count)
@@ -94,6 +170,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             {
                 buffer[i + offset] *= Volume;
             }
+            ReadOverlay(buffer, offset, samplesRead);
             return samplesRead;
         }
 
@@ -128,6 +205,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 state = SessionState.Playing;
             }
 
+            ReadOverlay(buffer, offset, samplesRead);
             return samplesRead;
         }
 
@@ -158,7 +236,50 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
                 audio = null;
             }
 
+            ReadOverlay(buffer, offset, samplesRead);
             return samplesRead;
+        }
+
+        private void ReadOverlay(float[] buffer, int offset, int samplesRead)
+        {
+            float[] overlayData;
+            foreach (KeyValuePair<string, OverlayFadeWrapper> overlayItem in overlays)
+            {
+                OverlayFadeWrapper overlay = overlayItem.Value;
+                overlayData = new float[samplesRead];
+                overlay.OverlayAudio.Read(overlayData, 0, samplesRead);
+
+                int bytesPerSample = overlay.OverlayAudio.WaveFormat.BitsPerSample / 8;
+                long bytesRead = samplesRead * bytesPerSample;
+                if (overlay.FadeOut)
+                    overlay.BytesReadSinceFadeOutRequest += bytesRead;
+
+                long startPos = overlay.BytesReadSinceFadeOutRequest - bytesRead;
+                for (int i = 0; i < samplesRead; i++)
+                {
+                    if (offset + i >= buffer.Length && i >= overlayData.Length)
+                        break;
+
+                    float sample = overlayData[i];
+
+                    if (overlay.FadeOut)
+                    {
+                        long relativePos = startPos + (i * bytesPerSample);
+                        float volumeFactor;
+                        if (overlay.OverlayAudio.TransitionLength == 0)
+                            volumeFactor = 0f;
+                        else
+                            volumeFactor = 1 - (Math.Max(0, Math.Min(1, (float)(relativePos - fadeOutPos) / overlay.OverlayAudio.TransitionLength)));
+
+                        sample *= volumeFactor;
+                    }
+
+                    buffer[offset + i] += sample;
+                }
+
+                if (overlay.IsDone)
+                    overlays.Remove(overlayItem.Key);
+            }
         }
 
         public void Dispose()

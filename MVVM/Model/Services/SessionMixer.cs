@@ -41,6 +41,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
         /// </summary>
         public void Init(Track track)
         {
+            if (IsPlaying)
+                return;
             if (tracks.TryGetValue(track, out LoopableCachedAudio? audio))
             {
                 if (sessionTrack is not null)
@@ -56,6 +58,50 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             {
                 throw new Exception("Track not within initialized tracks.");
             }
+        }
+
+        /// <summary>
+        /// Starts a session mixer with no specified track.
+        /// </summary>
+        public void InitEmpty()
+        {
+            sessionTrack = new SessionTrack();
+            waveOut = new WaveOutEvent();
+            waveOut.Init(sessionTrack);
+            waveOut.Play();
+            IsPlaying = true;
+        }
+
+        /// <summary>
+        /// Requests that a track is added as an overlay.
+        /// If track is already an overlay track this removes it instead.
+        /// </summary>
+        public void AddTrackAsOverlay(Track track)
+        {
+            if (sessionTrack is null || !tracks.TryGetValue(track, out LoopableCachedAudio? audio) 
+                || sessionTrack.IsOverlay(track.Name))
+                return;
+
+            sessionTrack.AddOverlayTrack(track.Name, audio);
+        }
+
+        /// <summary>
+        /// Requests that an overlay track is removed.
+        /// </summary>
+        public void RemoveTrackAsOverlay(Track track)
+        {
+            if (sessionTrack is null || !tracks.ContainsKey(track) || !sessionTrack.IsOverlay(track.Name))
+                return;
+
+            sessionTrack.RemoveOverlayTrack(track.Name);
+        }
+
+        public bool IsOverlay(Track track)
+        {
+            if (sessionTrack is null)
+                return false;
+
+            return sessionTrack.IsOverlay(track.Name);
         }
 
         /// <summary>

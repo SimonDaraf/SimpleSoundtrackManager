@@ -19,6 +19,7 @@
         </Border.Opacity>
         <Border.InputBindings>
             <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
+            <MouseBinding Gesture="Shift+LeftClick"  MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
         </Border.InputBindings>
         <Grid>
             <Grid.RowDefinitions>

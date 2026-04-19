@@ -6,3 +6,4 @@
 using ctrl + left click on a track, and stopped with ctrl + left click on the same track.
 * Tracks can now be assigned a category in the track editor.
 * During a session a user can now filter tracks based on their category and/or if they are active.
+* Allow for the selection of a specific audio output device through a new dedicated preference window.

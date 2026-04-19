@@ -69,26 +69,26 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         /// <summary>
         /// Appends an overlay track to the active session.
         /// </summary>
-        public void AddOverlayTrack(string identifier, LoopableCachedAudio audio)
+        public void AddOverlayTrack(string identifier, LoopableCachedAudio overlay)
         {
             if (overlays.ContainsKey(identifier))
                 return;
 
-            if (audio.Equals(audio))
+            if (audio is not null && audio.Equals(overlay))
             {
                 if (state == SessionState.Replacing)
                 {
-                    this.audio = toReplace;
+                    audio = toReplace;
                     state = SessionState.Playing;
                 }
                 else
                 {
-                    this.audio = null;
+                    audio = null;
                     state = SessionState.Empty;
                 }
             }
 
-            overlays.Add(identifier, new OverlayFadeWrapper { OverlayAudio = audio });
+            overlays.Add(identifier, new OverlayFadeWrapper { OverlayAudio = overlay });
         }
 
         /// <summary>
@@ -109,25 +109,25 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         /// Requests that the session is started with specified track.
         /// If session is already playing this does nothing, use replace instead.
         /// </summary>
-        public void RequestStart(LoopableCachedAudio audio)
+        public void RequestStart(LoopableCachedAudio newAudio)
         {
             if (state is not SessionState.Empty)
                 return;
 
             foreach (string key in overlays.Keys)
             {
-                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(audio))
+                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(newAudio))
                 {
                     // Handle edge case where we want to transition from an overlay to base track.
                     overlays.Remove(key);
-                    this.audio = audio;
+                    this.audio = newAudio;
                     state = SessionState.Playing;
                     return;
                 }
             }
 
-            audio.Position = audio.StartPosition;
-            this.audio = audio;
+            newAudio.Position = newAudio.StartPosition;
+            this.audio = newAudio;
             state = SessionState.Playing;
         }
 
@@ -146,24 +146,24 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
         /// <summary>
         /// Request the session to replace the base track.
         /// </summary>
-        public void RequestReplacement(LoopableCachedAudio audio)
+        public void RequestReplacement(LoopableCachedAudio newAudio)
         {
             foreach (string key in overlays.Keys)
             {
-                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(audio))
+                if (overlays.TryGetValue(key, out OverlayFadeWrapper? overlay) && overlay.OverlayAudio.Equals(newAudio))
                 {
                     // Handle edge case where we want to transition from an overlay to base track.
                     overlays.Remove(key);
                     if (this.audio is null)
                     {
-                        this.audio = audio;
+                        this.audio = newAudio;
                         state = SessionState.Playing;
                         return;
                     }
                 }
             }
-            audio.Position = audio.StartPosition;
-            toReplace = audio;
+            newAudio.Position = newAudio.StartPosition;
+            toReplace = newAudio;
             state = SessionState.Replacing;
         }
 

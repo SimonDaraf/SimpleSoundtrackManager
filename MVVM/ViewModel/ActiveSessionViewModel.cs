@@ -135,7 +135,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     else
                         mixer.RequestChange(vm.Track);
 
-                    Status = $"Playing: {vm.Track.Name}";
+                    Status = mixer.IsPlaying ? "Playing" : "Ready";
                 }
             }
 

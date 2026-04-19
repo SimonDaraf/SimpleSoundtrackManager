@@ -119,10 +119,12 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
                 if (cTrack is null)
                 {
                     sessionTrack.RequestStart(audio);
+                    IsPlaying = true;
                 }
                 else if (cTrack is not null && cTrack.Equals(audio))
                 {
                     sessionTrack.RequestFadeOut();
+                    IsPlaying = false;
                 }
                 else
                 {

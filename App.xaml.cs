@@ -35,6 +35,11 @@ namespace SimpleSoundtrackManager
                 DataContext = provider.GetRequiredService<MainWindowViewModel>()
             });
 
+            services.AddTransient(provider => new PreferencesWindow
+            {
+                DataContext = provider.GetRequiredService<PreferencesViewModel>()
+            });
+
             services.AddTransient(provider =>
             {
                 OpenSessionViewModel vm = provider.GetRequiredService<OpenSessionViewModel>();
@@ -56,6 +61,7 @@ namespace SimpleSoundtrackManager
             services.AddTransient<OpenSessionViewModel>();
             services.AddTransient<CreateNewSessionViewModel>();
             services.AddTransient<SessionSelectorViewModel>();
+            services.AddSingleton<PreferencesViewModel>();
             services.AddKeyedTransient<NavigatableViewModel, ActiveSessionViewModel>(NavigationViews.ActiveSession);
             services.AddKeyedTransient<NavigatableViewModel, SessionViewModel>(NavigationViews.SessionView);
 
@@ -64,11 +70,16 @@ namespace SimpleSoundtrackManager
             services.AddSingleton<SessionManager>();
             services.AddSingleton<SessionTracker>();
             services.AddSingleton<AudioPlayer>();
+            services.AddSingleton<SettingsManager>();
+            services.AddTransient<SessionMixer>();
 
             // Other misc declarations.
             services.AddTransient<Func<NavigationViews, NavigatableViewModel>>(provider => key => provider.GetRequiredKeyedService<NavigatableViewModel>(key));
             services.AddTransient<Func<CreateNewSessionWindow>>(provider => () => provider.GetRequiredService<CreateNewSessionWindow>());
             services.AddTransient<Func<SessionSelectorViewModel>>(provider => () => provider.GetRequiredService<SessionSelectorViewModel>());
+            services.AddTransient<Func<PreferencesWindow>>(provider => () => provider.GetRequiredService<PreferencesWindow>());
+            services.AddTransient<Func<SessionMixer>>(provider => () => provider.GetRequiredService<SessionMixer>());
+            services.AddTransient<Func<AudioPlayer>>(provider => () => provider.GetRequiredService<AudioPlayer>());
 
             // Avoid having the container track these instances.
             services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => {

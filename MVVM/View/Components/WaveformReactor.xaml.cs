@@ -98,11 +98,11 @@ namespace SimpleSoundtrackManager.MVVM.View.Components
             {   
                 Dispatcher.InvokeAsync(() =>
                 {
-                    // We want to constantly provide newer samples, if for some reason we are behind, clear and start with newer ones.
-                    bufferQueue.Clear();
-
                     if (!m.TrackName.Equals(Track.Name) && !m.TrackName.Equals(Track.FilePath))
                         return;
+
+                    // We want to constantly provide newer samples, if for some reason we are behind, clear and start with newer ones.
+                    bufferQueue.Clear();
 
                     int samplesPerSecond = SampleRate / 60 * ChannelCount;
 

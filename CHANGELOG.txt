@@ -1,5 +1,9 @@
-﻿* Fixed an issue where an incorrect conditional check caused the exit button to not properly shut down the application.
-* Fixed an issue where a waveform missmatch betweeen the wave out event and desired audio track caused the audio to be malformed.
-* Fixed an issue where if a session was imported from another computer, the missing filepaths would cause the application to crash.
-* Fix an issue where if a file was labeled by the OS as protected, writing to that file caused the application to crash.
-* Modiefied how audio data is dispatched so that each waveform only reacts to their tracks audio data.
+﻿* Keep session volume between sessions.
+* Display a warning a user attempts to play a track when audio is still being cached.
+* Allow track specific volume to be modified during an active session.
+* When an active track is clicked during a session it fades out instead of trying to play again from the beginning causing the position to jump all over between reads.
+* Allow Users to start tracks av overlay tracks, the user can start any number of tracks as an overlay track except the base track currently playing. An overlay track can be started
+using ctrl + left click on a track, and stopped with ctrl + left click on the same track.
+* Tracks can now be assigned a category in the track editor.
+* During a session a user can now filter tracks based on their category and/or if they are active.
+* Allow for the selection of a specific audio output device through a new dedicated preference window.

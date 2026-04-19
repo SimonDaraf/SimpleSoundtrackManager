@@ -17,7 +17,6 @@
             </Grid.RowDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -29,9 +28,14 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBox x:Name="NameInput" Grid.Column="0" Text="{Binding Track.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  VerticalAlignment="Center" FontSize="14" Margin="0, 0, 10, 0" Foreground="{StaticResource Foreground}"
-                                 Style="{StaticResource TextBoxStyle}" Width="400"/>
+                                 Style="{StaticResource TextBoxStyle}" Width="300"/>
                         <Button Grid.Column="1" Style="{StaticResource ButtonStyle}" BorderBrush="{Binding BrushColor}"
                                 Command="{Binding OpenColorPickerCommand}" Margin="5, 10" Content="Color" Padding="5,0"/>
+
+                        <TextBlock Text="Category:" Margin="10, 0, 10, 0" Foreground="{StaticResource Foreground}" VerticalAlignment="Center"/>
+                        <TextBox x:Name="CategoryInput" Grid.Column="0" Text="{Binding Track.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Center" FontSize="14" Margin="0, 0, 10, 0" Foreground="{StaticResource Foreground}"
+                                 Style="{StaticResource TextBoxStyle}" Width="200"/>
                     </StackPanel>
                 </Grid>
                 

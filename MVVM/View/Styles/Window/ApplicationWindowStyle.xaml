@@ -73,6 +73,16 @@
                                                       VerticalAlignment="Top"
                                                       Command="{Binding Path=ExitCommand}"/>
                                         </MenuItem>
+                                        <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownStyle}"
+                                                  Header="Edit"
+                                                  Height="20"
+                                                  VerticalAlignment="Top">
+                                            <MenuItem Style="{StaticResource ApplicationWindowToolbarDropdownItemStyle}"
+                                                      Header="Preferences"
+                                                      Height="20"
+                                                      VerticalAlignment="Top"
+                                                      Command="{Binding Path=OpenPreferencesCommand}"/>
+                                        </MenuItem>
                                     </Menu>
                                 </StackPanel>
 

@@ -5,7 +5,6 @@ using SimpleSoundtrackManager.MVVM.Model.Data;
 using SimpleSoundtrackManager.MVVM.Model.Utils;
 using System.IO;
 using System.Windows;
-using System.Windows.Documents;
 
 namespace SimpleSoundtrackManager.MVVM.Model.Services
 {

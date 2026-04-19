@@ -71,12 +71,15 @@ namespace SimpleSoundtrackManager
             services.AddSingleton<SessionTracker>();
             services.AddSingleton<AudioPlayer>();
             services.AddSingleton<SettingsManager>();
+            services.AddTransient<SessionMixer>();
 
             // Other misc declarations.
             services.AddTransient<Func<NavigationViews, NavigatableViewModel>>(provider => key => provider.GetRequiredKeyedService<NavigatableViewModel>(key));
             services.AddTransient<Func<CreateNewSessionWindow>>(provider => () => provider.GetRequiredService<CreateNewSessionWindow>());
             services.AddTransient<Func<SessionSelectorViewModel>>(provider => () => provider.GetRequiredService<SessionSelectorViewModel>());
             services.AddTransient<Func<PreferencesWindow>>(provider => () => provider.GetRequiredService<PreferencesWindow>());
+            services.AddTransient<Func<SessionMixer>>(provider => () => provider.GetRequiredService<SessionMixer>());
+            services.AddTransient<Func<AudioPlayer>>(provider => () => provider.GetRequiredService<AudioPlayer>());
 
             // Avoid having the container track these instances.
             services.AddTransient<Func<Track, TrackSelectorViewModel>>(provider => {

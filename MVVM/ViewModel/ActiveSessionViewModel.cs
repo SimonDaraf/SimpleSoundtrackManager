@@ -11,6 +11,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
     public partial class ActiveSessionViewModel : NavigatableViewModel
     {
         private readonly NavigationService navigationService;
+        private readonly Func<SessionMixer> mixerFactory;
 
         private TrackSessionViewModel? currentActive;
         private SessionMixer? mixer;
@@ -38,9 +39,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
 
         private List<TrackSessionViewModel> allTrackViews;
 
-        public ActiveSessionViewModel(NavigationService navigationService)
+        public ActiveSessionViewModel(NavigationService navigationService, Func<SessionMixer> mixerFactory)
         {
             this.navigationService = navigationService;
+            this.mixerFactory = mixerFactory;
             allTrackViews = new List<TrackSessionViewModel>();
             filters = new ObservableCollection<string>();
             Filters.Add("All");
@@ -83,8 +85,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
             Task.Run(() =>
             {
                 Status = "Caching Audio Data...";
-                mixer = new SessionMixer(Session.Tracks);
-                mixer.SetVolume(Volume);
+                SessionMixer m = mixerFactory();
+                m.CacheAudioData(Session.Tracks);
+                m.SetVolume(Volume);
+                mixer = m;
                 Status = "Ready";
             });
         }

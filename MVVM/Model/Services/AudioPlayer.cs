@@ -8,6 +8,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
     public class AudioPlayer
     {
+        private readonly SettingsManager settingsManager;
         public event EventHandler<Track>? OnTrackChanged;
 
         private WaveOutEvent? outputDevice;
@@ -15,6 +16,11 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
         public bool IsPlaying { get; private set; }
         public Track? ActiveTrack { get; private set; }
+
+        public AudioPlayer(SettingsManager settingsManager)
+        {
+            this.settingsManager = settingsManager;
+        }
 
         private void CreateSignalChain(Track track)
         {
@@ -32,7 +38,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
             ActiveTrack = track;
             ActiveTrack.OnTrackPlayPositionUpdateRequested += ActiveTrack_OnTrackPlayPositionUpdateRequested;
-            outputDevice ??= new WaveOutEvent();
+            outputDevice = new WaveOutEvent();
+            outputDevice.DeviceNumber = settingsManager.GetSelectedDevice();
 
             CreateSignalChain(track);
             source!.OnPositionUpdated += Source_PositionUpdated;

@@ -7,13 +7,20 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 {
     public class SessionMixer : IDisposable
     {
+        private readonly SettingsManager settingsManager;
         private Dictionary<Track, LoopableCachedAudio> tracks;
         private WaveOutEvent? waveOut;
         private SessionTrack? sessionTrack;
 
         public bool IsPlaying { get; private set; } = false;
 
-        public SessionMixer(IEnumerable<Track> tracks)
+        public SessionMixer(SettingsManager settingsManager)
+        {
+            this.settingsManager = settingsManager;
+            tracks = new Dictionary<Track, LoopableCachedAudio>();
+        }
+
+        public void CacheAudioData(IEnumerable<Track> tracks)
         {
             this.tracks = new Dictionary<Track, LoopableCachedAudio>();
             foreach (Track track in tracks)
@@ -50,6 +57,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
 
                 sessionTrack = new SessionTrack(audio);
                 waveOut = new WaveOutEvent();
+                waveOut.DeviceNumber = settingsManager.GetSelectedDevice();
                 waveOut.Init(sessionTrack);
                 waveOut.Play();
                 IsPlaying = true;
@@ -68,6 +76,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Services
             sessionTrack = new SessionTrack();
             waveOut = new WaveOutEvent();
             waveOut.Init(sessionTrack);
+            waveOut.DeviceNumber = settingsManager.GetSelectedDevice();
             waveOut.Play();
             IsPlaying = true;
         }

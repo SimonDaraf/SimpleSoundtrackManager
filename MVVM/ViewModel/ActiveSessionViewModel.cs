@@ -89,20 +89,25 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     {
                         mixer.RemoveTrackAsOverlay(vm.Track);
                         vm.IsActive = false;
+                        vm.State = string.Empty;
                     }
                     else
                     {
                         mixer.AddTrackAsOverlay(vm.Track);
                         vm.IsActive = true;
+                        vm.State = "Overlay";
                     }
-                    
                 }
                 else
                 {
                     vm.IsActive = true;
+                    vm.State = "Base";
 
                     if (currentActive is not null)
+                    {
                         currentActive.IsActive = false;
+                        currentActive.State = string.Empty;
+                    } 
 
                     currentActive = vm;
                     if (!mixer.IsPlaying)

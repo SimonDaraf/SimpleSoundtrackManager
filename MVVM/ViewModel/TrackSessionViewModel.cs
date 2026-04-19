@@ -27,6 +27,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         [ObservableProperty]
         private bool isActive = false;
 
+        [ObservableProperty]
+        private string state = "";
+
         bool isShiftDown = false;
 
         public TrackSessionViewModel()

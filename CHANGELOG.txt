@@ -2,3 +2,5 @@
 * Display a warning a user attempts to play a track when audio is still being cached.
 * Allow track specific volume to be modified during an active session.
 * When an active track is clicked during a session it fades out instead of trying to play again from the beginning causing the position to jump all over between reads.
+* Allow Users to start tracks av overlay tracks, the user can start any number of tracks as an overlay track except the base track currently playing. An overlay track can be started
+using ctrl + left click on a track, and stopped with ctrl + left click on the same track.

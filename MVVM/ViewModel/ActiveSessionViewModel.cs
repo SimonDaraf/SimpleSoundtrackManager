@@ -105,6 +105,9 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                     if (!mixer.IsPlaying)
                         mixer.InitEmpty();
 
+                    if (currentActive is not null && currentActive.Equals(vm))
+                        currentActive = null;
+
                     if (mixer.IsOverlay(vm.Track))
                     {
                         mixer.RemoveTrackAsOverlay(vm.Track);

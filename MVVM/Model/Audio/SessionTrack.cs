@@ -74,6 +74,20 @@ namespace SimpleSoundtrackManager.MVVM.Model.Audio
             if (overlays.ContainsKey(identifier))
                 return;
 
+            if (audio.Equals(audio))
+            {
+                if (state == SessionState.Replacing)
+                {
+                    this.audio = toReplace;
+                    state = SessionState.Playing;
+                }
+                else
+                {
+                    this.audio = null;
+                    state = SessionState.Empty;
+                }
+            }
+
             overlays.Add(identifier, new OverlayFadeWrapper { OverlayAudio = audio });
         }
 

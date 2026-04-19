@@ -72,6 +72,10 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 };
                 vm.OnTrackChangeRequested += OnTrackChangeRequested;
                 allTrackViews.Add(vm);
+
+                string category = vm.Track.Category;
+                if (!Filters.Contains(category))
+                    Filters.Add(category);
             }
 
             Filter();

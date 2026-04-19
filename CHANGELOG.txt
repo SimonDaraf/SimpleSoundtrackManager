@@ -4,3 +4,5 @@
 * When an active track is clicked during a session it fades out instead of trying to play again from the beginning causing the position to jump all over between reads.
 * Allow Users to start tracks av overlay tracks, the user can start any number of tracks as an overlay track except the base track currently playing. An overlay track can be started
 using ctrl + left click on a track, and stopped with ctrl + left click on the same track.
+* Tracks can now be assigned a category in the track editor.
+* During a session a user can now filter tracks based on their category and/or if they are active.

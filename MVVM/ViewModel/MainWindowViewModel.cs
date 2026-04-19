@@ -14,6 +14,7 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private readonly NavigationService navigationService;
         private readonly SessionManager sessionManager;
         private readonly SessionTracker sessionTracker;
+        private readonly Func<PreferencesWindow> openPreferences;
 
         [ObservableProperty]
         private ObservableObject? activeViewModel;
@@ -24,11 +25,13 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
         private bool ctrlHeldDown = false;
         private bool sHeldDown;
 
-        public MainWindowViewModel(NavigationService navigationService, SessionManager sessionManager, SessionTracker sessionTracker)
+        public MainWindowViewModel(NavigationService navigationService, SessionManager sessionManager, SessionTracker sessionTracker,
+            Func<PreferencesWindow> openPreferences)
         {
             this.navigationService = navigationService;
             this.sessionManager = sessionManager;
             this.sessionTracker = sessionTracker;
+            this.openPreferences = openPreferences;
             navigationService.OnNavigationRequested += NavigationService_OnNavigationRequested;
 
             sessionTracker.OnBeforeSessionChanged += SessionTracker_OnBeforeSessionChanged;
@@ -117,6 +120,14 @@ namespace SimpleSoundtrackManager.MVVM.ViewModel
                 session.MarkClean();
                 Serializer.ToBinary(session, session.FullPath);
             }
+        }
+
+        [RelayCommand]
+        private void OpenPreferences()
+        {
+            PreferencesWindow w = openPreferences();
+            w.Owner = App.Current.MainWindow;
+            w.ShowDialog();
         }
 
         [RelayCommand]

@@ -18,7 +18,7 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
         [Key(3)]
         public ObservableCollection<Track> Tracks { get; set; } = [];
 
-        private float volume;
+        private float volume = -1;
 
         [Key(4)]
         public float Volume
@@ -26,7 +26,8 @@ namespace SimpleSoundtrackManager.MVVM.Model.Data
             get => volume;
             set
             {
-                MakeDirty();
+                if (value != Volume && volume != -1)
+                    MakeDirty();
                 volume = value;
             }
         }

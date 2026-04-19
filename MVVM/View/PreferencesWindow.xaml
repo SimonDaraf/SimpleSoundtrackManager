@@ -1,0 +1,36 @@
+﻿<settingswindow:SettingsApplicationWindow  
+        xmlns:settingswindow="clr-namespace:SimpleSoundtrackManager.MVVM.View.CustomWindows.SettingsWindow"
+        x:Class="SimpleSoundtrackManager.MVVM.View.PreferencesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleSoundtrackManager.MVVM.View"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d"
+        Style="{StaticResource ApplicationSettingsWindow}"
+        Title="Preferences" Width="460" Height="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30px"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Vertical">
+            <TextBlock Text="Audio Settings" Foreground="{StaticResource Foreground}" FontSize="14"/>
+            <Separator Style="{StaticResource MenuSeparatorStyle}" HorizontalAlignment="Stretch" Margin="0, 5"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=".5*"/>
+                    <ColumnDefinition Width=".5*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Foreground="{StaticResource Foreground}" Text="Audio Device" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Style="{StaticResource DropdownStyle}" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0"
+                          ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}"/>
+            </Grid>
+        </StackPanel>
+        
+        <TextBlock Margin="10, 5" Grid.Row="1" Text="{Binding Version}" Foreground="{StaticResource Foreground}"/>
+    </Grid>
+</settingswindow:SettingsApplicationWindow>
